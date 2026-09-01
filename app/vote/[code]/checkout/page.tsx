@@ -1,6 +1,7 @@
-'use client'
-import { PublicHeader, PublicFooter, Pill, Button } from '@/components/foundation'
-import { nominees, mockVotePrice } from '@/lib/mock-data'
-import { useSearchParams } from 'next/navigation'
-export default function VoteCheckout({ params }: { params: Promise<{ code: string }> }) { return <VoteCheckoutInner params={params} /> }
-function VoteCheckoutInner({ params }: { params: Promise<{ code: string }> }) { const query = useSearchParams(); const code = query.get('code') || '50MISA26001'; const nominee = nominees.find(n => n.code.toLowerCase() === code.toLowerCase()) || nominees[0]; const votes = Number(query.get('votes') || 1); return <><PublicHeader/><main className="section checkout-page"><Pill tone="gold">Frontend demo checkout</Pill><h1>Complete your <em>vote.</em></h1><div className="panel order-summary"><h2>{nominee.name}</h2><p>{nominee.code} · {votes} vote{votes === 1 ? '' : 's'}</p><strong>Demo amount · NLe {(votes * mockVotePrice).toLocaleString()}</strong><input aria-label="Customer email" placeholder="Email address"/><input aria-label="Customer phone" placeholder="Phone number"/><div className="payment-placeholder">Payment method placeholder<br/><small>No payment processing is connected yet.</small></div><Button>Review demo order</Button></div></main><PublicFooter/></> }
+import { VoteCheckout } from '@/components/voting/voting'
+
+export default async function VoteCheckoutPage({ params, searchParams }: { params: Promise<{ code: string }>; searchParams: Promise<{ votes?: string }> }) {
+  const { code } = await params
+  const query = await searchParams
+  return <VoteCheckout code={code} votes={Math.max(1, Number(query.votes ?? 1))} />
+}

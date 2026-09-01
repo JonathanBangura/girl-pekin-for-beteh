@@ -1,2 +1,2 @@
-import { PortalDashboard } from '@/components/foundation'
+import { PortalDashboard } from '@/components/portal/portal'
 export default async function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) { const { section } = await params; return <main><PortalDashboard admin /><div className="section"><p className="eyebrow">Admin section</p><h1>{section.replaceAll('-', ' ')} <em>workspace.</em></h1><p>This frontend demo section is ready for backend wiring.</p></div></main> }
