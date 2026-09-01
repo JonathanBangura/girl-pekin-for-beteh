@@ -1,0 +1,3 @@
+import { PublicHeader, PublicFooter, SectionHeading, NomineeCard, Pill } from '@/components/foundation'
+import { nominees } from '@/lib/mock-data'
+export default function AwardsPage() { return <><PublicHeader/><main className="section"><Pill tone="gold">6th edition · 2026</Pill><h1>50 Most Influential Students&apos; <em>Award.</em></h1><p>Celebrating representative student leaders across Sierra Leone. Nominee stories and numbers below are mock data for this frontend prototype.</p><SectionHeading label="People&apos;s choice" title={<>Meet the <em>nominees.</em></>} /><div className="event-grid">{nominees.map(n=><NomineeCard nominee={n} key={n.name}/>)}</div></main><PublicFooter/></> }
