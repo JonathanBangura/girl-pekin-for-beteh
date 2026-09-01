@@ -1,2 +1,2 @@
-import { PortalDashboard } from '@/components/foundation'
+import { PortalDashboard } from '@/components/portal/portal'
 export default function NomineePage() { return <PortalDashboard /> }
