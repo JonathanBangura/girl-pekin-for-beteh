@@ -173,45 +173,95 @@ export function PortalLayout({ children, admin = false }: { children: React.Reac
 }
 
 export function PortalDashboard({ admin = false }: { admin?: boolean }) {
-  const nomineeStats = [
-    { label: 'Total votes', value: '1,284', change: 'Sample data' },
-    { label: 'Votes today', value: '86', change: 'Sample data' },
-    { label: 'Current rank', value: '#04', change: 'Demo ranking' },
-  ]
-  return (
-    <div className="portal-content">
-      <div className="portal-title professional-portal-title">
-        <div>
-          <StatusBadge tone="teal">{admin ? 'Operations overview' : '2026 Award Edition'}</StatusBadge>
-          <h1>{admin ? 'Administration dashboard' : 'Campaign dashboard'}</h1>
-          <p>{admin ? 'Monitor awards, events, voting, ticketing and platform activity from one workspace.' : 'Track your public campaign performance and access your nominee tools.'}</p>
+  if (!admin) {
+    return (
+      <div className="portal-content v2-dashboard-page">
+        <div className="v2-dashboard-head">
+          <div><span className="v2-admin-eyebrow">Nominee Portal · 50MISA26001</span><h1>Campaign dashboard</h1><p>Monitor your public campaign and access the tools provided for the current award edition.</p></div>
+          <div className="v2-dashboard-status"><span className="live-indicator"/> Voting window · Demo state</div>
         </div>
-        <div className="profile-avatar">{admin ? 'AD' : 'MK'}</div>
-      </div>
-
-      <div className={`stat-row ${admin ? 'admin-stats' : ''}`}>
-        {(admin ? stats : nomineeStats).map(s => (
-          <div className="stat-box" key={s.label}>
-            <span>{s.label}</span>
-            <b>{s.value}</b>
-            <small>{s.change}</small>
+        <div className="v2-kpi-grid nominee-kpis">
+          <article><span>Total votes</span><strong>1,284</strong><small>Demo data</small></article>
+          <article><span>Current rank</span><strong>#04</strong><small>Demo ranking</small></article>
+          <article><span>Votes today</span><strong>86</strong><small>Demo data</small></article>
+          <article><span>Votes this week</span><strong>326</strong><small>Demo data</small></article>
+        </div>
+        <div className="v2-dashboard-grid">
+          <section className="panel v2-dashboard-card v2-chart-card">
+            <div className="v2-card-head"><div><span className="v2-admin-eyebrow">Campaign performance</span><h2>Vote activity</h2></div><StatusBadge>Demo data</StatusBadge></div>
+            <div className="v2-bars">{bars.map((b, i) => <i className={i === bars.length - 1 ? 'current' : ''} style={{ height: `${b}%` }} key={i} />)}</div>
+            <div className="v2-chart-footer"><span>Voting start</span><span>Current</span></div>
+          </section>
+          <aside className="v2-nominee-account-card">
+            <span className="v2-admin-eyebrow light">Public profile</span>
+            <div className="v2-account-avatar">MK</div>
+            <h2>Mariama Koroma</h2>
+            <p>University of Sierra Leone</p>
+            <dl><div><dt>Nominee code</dt><dd>50MISA26001</dd></div><div><dt>Award edition</dt><dd>6th Edition · 2026</dd></div></dl>
+            <Link className="button light" href="/vote/50MISA26001">View public voting page <ArrowUpRight size={14}/></Link>
+          </aside>
+        </div>
+        <section className="panel v2-dashboard-actions">
+          <div><span className="v2-admin-eyebrow">Campaign tools</span><h2>Quick access</h2></div>
+          <div className="v2-quick-action-grid">
+            <Link href="/nominee/profile"><UserRound size={17}/><span><b>My Profile</b><small>Review public information</small></span></Link>
+            <Link href="/nominee/performance"><TrendingUp size={17}/><span><b>Vote Performance</b><small>Review demo analytics</small></span></Link>
+            <Link href="/nominee/campaign"><Share2 size={17}/><span><b>Campaign Tools</b><small>Links, QR and assets</small></span></Link>
+            <Link href="/nominee/pass"><BadgeCheck size={17}/><span><b>Ceremony Pass</b><small>Preview digital pass</small></span></Link>
           </div>
-        ))}
+        </section>
+      </div>
+    )
+  }
+
+  const operationalStats = [
+    ['Active award edition','2026','6th Edition'],
+    ['Published nominees','18','Demo data'],
+    ['Vote orders','1,284','Demo data'],
+    ['Ticket orders','48','Demo data'],
+  ]
+
+  return (
+    <div className="portal-content v2-dashboard-page">
+      <div className="v2-dashboard-head">
+        <div><span className="v2-admin-eyebrow">Operations Overview</span><h1>Administration dashboard</h1><p>Monitor the active award edition, public participation, event operations and payment activity.</p></div>
+        <div className="v2-dashboard-head-actions"><span className="v2-dashboard-status"><span className="live-indicator"/> Frontend preview</span><Link className="button" href="/admin/awards/nominees">Manage nominees</Link></div>
       </div>
 
-      <div className="portal-grid">
-        <section className="panel chart-panel">
-          <div className="panel-heading"><div><span className="eyebrow">Activity overview</span><h2>{admin ? 'Platform activity' : 'Campaign momentum'}</h2></div><StatusBadge>Demo data</StatusBadge></div>
-          <div className="bars">{bars.map((b, i) => <i className={i === bars.length - 1 ? 'current' : ''} style={{ height: `${b}%` }} key={i} />)}</div>
-          <div className="chart-labels"><span>Start</span><span>Current</span></div>
+      <div className="v2-kpi-grid">{operationalStats.map(([label,value,note]) => <article key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></article>)}</div>
+
+      <div className="v2-dashboard-grid admin-dashboard-grid">
+        <section className="panel v2-dashboard-card v2-chart-card">
+          <div className="v2-card-head"><div><span className="v2-admin-eyebrow">Participation trend</span><h2>Platform activity</h2></div><StatusBadge>Demo data</StatusBadge></div>
+          <div className="v2-bars">{bars.map((b, i) => <i className={i === bars.length - 1 ? 'current' : ''} style={{ height: `${b}%` }} key={i} />)}</div>
+          <div className="v2-chart-footer"><span>Earlier</span><span>Current</span></div>
         </section>
-        <section className="panel action-panel">
-          <span className="eyebrow">Quick action</span>
-          <h2>{admin ? 'Event operations' : 'Public voting profile'}</h2>
-          <p>{admin ? 'Open the event-day scanner interface or continue into the administration modules.' : 'Preview the public voting experience connected to your nominee profile.'}</p>
-          <Link className="button" href={admin ? '/scan' : '/vote/50MISA26001'}>{admin ? 'Open scanner' : 'View voting page'} <ArrowUpRight size={15}/></Link>
+        <section className="panel v2-attention-card">
+          <div className="v2-card-head"><div><span className="v2-admin-eyebrow">Needs attention</span><h2>Operational queue</h2></div><span className="v2-queue-count">4</span></div>
+          <div className="v2-attention-list">
+            <Link href="/admin/awards/applications"><FileText size={16}/><span><b>12 applications awaiting review</b><small>Awards / Applications</small></span><ArrowUpRight size={14}/></Link>
+            <Link href="/admin/finance/reconciliation"><RefreshCw size={16}/><span><b>2 payments require reconciliation</b><small>Finance / Reconciliation</small></span><ArrowUpRight size={14}/></Link>
+            <Link href="/admin/events/orders"><Ticket size={16}/><span><b>7 ticket orders pending payment</b><small>Events / Orders</small></span><ArrowUpRight size={14}/></Link>
+            <Link href="/admin/awards/results"><Trophy size={16}/><span><b>Results workflow not published</b><small>Awards / Results</small></span><ArrowUpRight size={14}/></Link>
+          </div>
         </section>
       </div>
+
+      <section className="panel v2-dashboard-actions">
+        <div className="v2-card-head"><div><span className="v2-admin-eyebrow">Operations</span><h2>Primary workspaces</h2></div><Link className="text-button" href="/admin/audit">View audit log <ArrowUpRight size={14}/></Link></div>
+        <div className="v2-quick-action-grid admin-actions">
+          <Link href="/admin/awards"><Award size={17}/><span><b>Awards</b><small>Editions, nominees and results</small></span></Link>
+          <Link href="/admin/awards/voting"><Vote size={17}/><span><b>Voting</b><small>Monitor vote activity</small></span></Link>
+          <Link href="/admin/events"><CalendarDays size={17}/><span><b>Events</b><small>Ticketing and check-ins</small></span></Link>
+          <Link href="/admin/finance"><WalletCards size={17}/><span><b>Finance</b><small>Payments and reconciliation</small></span></Link>
+          <Link href="/scan"><ScanLine size={17}/><span><b>Event Scanner</b><small>Open check-in interface</small></span></Link>
+        </div>
+      </section>
+
+      <section className="panel v2-recent-activity">
+        <div className="v2-card-head"><div><span className="v2-admin-eyebrow">Recent activity</span><h2>Latest operational records</h2></div><StatusBadge>Demo data</StatusBadge></div>
+        <div className="v2-activity-table"><div className="head"><span>Activity</span><span>Module</span><span>Reference</span><span>Time</span></div><div><span>Vote order confirmed</span><span>Voting</span><b>VOTE-260184</b><small>20:08</small></div><div><span>Ticket order created</span><span>Events</span><b>ORD-26-00048</b><small>20:04</small></div><div><span>Nominee application reviewed</span><span>Awards</span><b>APP-260031</b><small>19:42</small></div><div><span>Ticket checked in</span><span>Check-ins</span><b>TKT-26-X82F91</b><small>19:31</small></div></div>
+      </section>
     </div>
   )
 }

@@ -1,2 +1,7 @@
-import { Pill, Button } from '@/components/public/public'
-export function AdminModule({ title, eyebrow = 'Admin operations' }: { title: string; eyebrow?: string }) { return <div className="portal-content"><div className="portal-title"><div><Pill tone="teal">{eyebrow} · demo</Pill><h1>{title}<br /><em>workspace.</em></h1><p>Frontend-only sample interface ready for future Supabase wiring.</p></div><Button>New {title}</Button></div><div className="stat-row"><div className="stat-box"><span>Sample records</span><b>48</b><small>Demo data</small></div><div className="stat-box"><span>Needs review</span><b>12</b><small>Placeholder queue</small></div><div className="stat-box"><span>System status</span><b>Open</b><small>Frontend only</small></div></div><section className="panel table-panel"><div className="table-head"><h2>{title} activity</h2><Pill>Mock content</Pill></div><div className="responsive-table"><table><thead><tr><th>Reference</th><th>Owner</th><th>Status</th><th>Updated</th><th>Action</th></tr></thead><tbody>{['DEMO-001','DEMO-002','DEMO-003'].map((item, index) => <tr key={item}><td>{item}</td><td>Sample record {index + 1}</td><td><Pill tone={index === 1 ? 'gold' : 'teal'}>{index === 1 ? 'Review' : 'Active'}</Pill></td><td>21 Aug 2026</td><td><button className="text-button">View</button></td></tr>)}</tbody></table></div></section></div> }
+'use client'
+
+import { AdminPage } from '@/components/portal/admin-pages'
+
+export function AdminModule({ title }: { title: string; eyebrow?: string }) {
+  return <AdminPage section={title}/>
+}

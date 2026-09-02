@@ -1,9 +1,10 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowUpRight, Check, Mail, MapPin, Phone } from 'lucide-react'
-import { PublicHeader, PublicFooter, SectionHeading, Pill, Button, NomineeCard, EventCard } from '@/components/public/public'
-import { events, news, nominees, eventDetails } from '@/lib/mock-data'
+import { ArrowUpRight, Check, Mail, MapPin, Phone, CalendarDays, Clock3, Ticket, Award, ShieldCheck } from 'lucide-react'
+import { PublicHeader, PublicFooter, SectionHeading, Pill, Button, NomineeCard } from '@/components/public/public'
+import { news, nominees, eventDetails, ticketTiers } from '@/lib/mock-data'
 
 function Shell({ children }: { children: React.ReactNode }) {
   return <><PublicHeader/><main>{children}</main><PublicFooter/></>
@@ -12,57 +13,43 @@ function Shell({ children }: { children: React.ReactNode }) {
 export function AboutPage() {
   return (
     <Shell>
-      <section className="page-hero">
-        <Pill tone="teal">About the Foundation</Pill>
-        <h1>A foundation focused on <em>opportunity and participation.</em></h1>
-        <p>This page is structured for approved information about the organization’s history, purpose, leadership and approach. Placeholder content remains clearly identified until confirmed.</p>
+      <section className="page-hero v2-page-hero">
+        <span className="v2-overline">About the Foundation</span>
+        <h1>Clear information about the organization, its purpose and its work.</h1>
+        <p>This page is prepared for approved organizational information. Mission, vision, history and leadership content remain placeholders until confirmed.</p>
       </section>
-      <section className="section two-col">
+      <section className="section v2-about-grid">
         <div>
-          <SectionHeading label="Purpose" title={<>Clear purpose.<br/><em>Responsible action.</em></>}/>
-          <p><strong>Mission placeholder:</strong> approved mission content will be added here once supplied by the foundation.</p>
-          <p><strong>Vision placeholder:</strong> approved long-term vision content will be added here once supplied by the foundation.</p>
+          <Pill>Purpose & Direction</Pill>
+          <h2 className="v2-editorial-heading">A professional structure for approved organizational information.</h2>
+          <div className="v2-copy-stack"><p><strong>Mission placeholder.</strong> Approved mission content will be added here when supplied by the foundation.</p><p><strong>Vision placeholder.</strong> Approved long-term vision content will be added here when supplied by the foundation.</p></div>
         </div>
-        <div className="panel values">
-          <h3>Operating principles</h3>
-          {['Listen and understand','Act with integrity','Create practical opportunity','Measure progress responsibly'].map(v => <div key={v}><Check size={17}/><span>{v}</span></div>)}
-        </div>
-      </section>
-      <section className="section section-surface">
-        <SectionHeading label="Leadership" title={<>People behind <em>the work.</em></>} copy="Leadership and team profiles will be displayed here when approved information is available."/>
-        <div className="impact-grid professional-focus-grid">
-          {['Leadership Team','Program Team','Advisory & Support'].map((name, i) => <article className="impact-card focus-card" key={name}><span className="focus-number">0{i+1}</span><h3>{name}</h3><p>Profile and role information placeholder.</p></article>)}
+        <div className="panel v2-principles-card">
+          <span className="v2-overline">Operating principles</span>
+          {['Listen and understand','Act with integrity','Create practical opportunity','Communicate with clarity'].map((v, i) => <div key={v}><span>{String(i+1).padStart(2,'0')}</span><Check size={16}/><strong>{v}</strong></div>)}
         </div>
       </section>
-      <section className="section professional-cta">
-        <div><Pill tone="gold">Connect</Pill><h2>Start a conversation with the foundation.</h2><p>Use the contact page for partnerships, programme enquiries and general information.</p></div>
-        <Link className="button light" href="/contact">Contact us <ArrowUpRight size={16}/></Link>
+      <section className="section section-surface v2-section-surface">
+        <SectionHeading label="Leadership" title={<>People behind the work</>} copy="Approved leadership and team profiles can be published here when available."/>
+        <div className="v2-leadership-grid">
+          {['Leadership Team','Programme Team','Advisory & Support'].map((name, i) => <article key={name}><span>{String(i+1).padStart(2,'0')}</span><h3>{name}</h3><p>Profile and role information placeholder.</p></article>)}
+        </div>
       </section>
+      <section className="v2-closing-cta"><div><span className="v2-overline light">Connect</span><h2>Start a conversation with the foundation.</h2><p>Use the contact page for partnerships, programme enquiries and general information.</p></div><Link className="button light" href="/contact">Contact us <ArrowUpRight size={15}/></Link></section>
     </Shell>
   )
 }
 
 export function ProgramsPage() {
+  const programs = [
+    ['01','Demo Programme One','Active demo','Approved programme image and summary will appear here.'],
+    ['02','Demo Programme Two','Active demo','Approved programme image and summary will appear here.'],
+    ['03','Demo Programme Three','Planned demo','Approved programme image and summary will appear here.'],
+  ]
   return (
     <Shell>
-      <section className="page-hero">
-        <Pill tone="teal">Programs & Initiatives</Pill>
-        <h1>Structured programmes with <em>clear objectives.</em></h1>
-        <p>Representative programme cards are shown below. Approved programme titles, descriptions, dates and outcomes can replace this demo content later.</p>
-      </section>
-      <section className="section">
-        <div className="program-grid">
-          {['Program One','Program Two','Program Three'].map((name, i) => (
-            <article className="panel program-card" key={name}>
-              <div className={`program-image ${['teal','coral','gold'][i]}`}>Approved image placeholder</div>
-              <Pill>{i === 2 ? 'Planned · Demo' : 'Demo program'}</Pill>
-              <h3>{name}</h3>
-              <p>Structured placeholder text for an approved programme summary, audience, objective and status.</p>
-              <Link className="text-button" href="/contact">Program enquiry <ArrowUpRight size={15}/></Link>
-            </article>
-          ))}
-        </div>
-      </section>
+      <section className="page-hero v2-page-hero"><span className="v2-overline">Programs & Initiatives</span><h1>Programmes presented with clarity, status and context.</h1><p>Representative content is used until approved programme titles, objectives, dates, locations and outcomes are supplied.</p></section>
+      <section className="section"><div className="v2-program-list">{programs.map(([n,title,status,copy]) => <article key={title}><span className="v2-program-number">{n}</span><div><Pill>{status}</Pill><h2>{title}</h2><p>{copy}</p></div><Link className="text-button" href="/contact">Programme enquiry <ArrowUpRight size={14}/></Link></article>)}</div></section>
     </Shell>
   )
 }
@@ -77,11 +64,11 @@ export function SimplePublicPage({ kind }: { kind: 'news'|'gallery'|'partners'|'
 
   return (
     <Shell>
-      <section className="page-hero"><Pill tone="teal">{kind}</Pill><h1>{config[0]}</h1><p>{config[1]}</p></section>
-      {kind === 'news' && <section className="section"><div className="story-grid">{news.map(n => <article className="panel" key={n.title}><Pill>{n.tag}</Pill><h3>{n.title}</h3><p>{n.date}</p><Link className="text-button" href="/news">Read update <ArrowUpRight size={15}/></Link></article>)}</div></section>}
-      {kind === 'gallery' && <section className="section gallery-grid">{['Programme activity','Workshop session','Awards ceremony','Community engagement','Training session','Event highlights'].map((x, i) => <div className={`gallery-tile ${['teal','coral','gold'][i%3]}`} key={x}><span>{x}</span><small>Approved image placeholder</small></div>)}</section>}
-      {kind === 'partners' && <section className="section"><div className="impact-grid professional-focus-grid">{['Title Partner','Supporting Partner','Media Partner'].map((x, i) => <article className="impact-card focus-card" key={x}><span className="focus-number">0{i+1}</span><h3>{x}</h3><p>Approved logo and organization details placeholder.</p></article>)}</div></section>}
-      {kind === 'contact' && <section className="section contact-layout"><form className="panel contact-form" onSubmit={e => e.preventDefault()}>{['Name','Email','Phone','Subject'].map(x => <label key={x}>{x}<input placeholder={`Enter ${x.toLowerCase()}`}/></label>)}<label>Message<textarea rows={5} placeholder="Enter your message"/></label><Button>Submit enquiry</Button></form><div className="panel contact-info"><h3>Contact information</h3><p>Official contact details will be added after confirmation.</p><p><Mail size={16}/> Email placeholder</p><p><Phone size={16}/> Phone placeholder</p><p><MapPin size={16}/> Freetown, Sierra Leone</p></div></section>}
+      <section className="page-hero v2-page-hero"><span className="v2-overline">{kind}</span><h1>{config[0]}</h1><p>{config[1]}</p></section>
+      {kind === 'news' && <section className="section"><div className="v2-news-list">{news.map((n, i) => <article key={n.title}><span>{String(i+1).padStart(2,'0')}</span><div><Pill>{n.tag}</Pill><h2>{n.title}</h2><p>{n.date}</p></div><Link className="text-button" href="/news">Read update <ArrowUpRight size={14}/></Link></article>)}</div></section>}
+      {kind === 'gallery' && <section className="section"><div className="v2-gallery-grid">{['Programme activity','Workshop session','Awards ceremony','Community engagement','Training session','Event highlights'].map((x, i) => <div className={`gallery-tile ${['teal','coral','gold'][i%3]}`} key={x}><span>{x}</span><small>Approved image placeholder</small></div>)}</div></section>}
+      {kind === 'partners' && <section className="section"><div className="v2-partner-grid">{['Title Partner','Supporting Partner','Media Partner'].map((x, i) => <article key={x}><span>{String(i+1).padStart(2,'0')}</span><div className="v2-logo-placeholder">Logo</div><h3>{x}</h3><p>Approved partner identity and information placeholder.</p></article>)}</div></section>}
+      {kind === 'contact' && <section className="section v2-contact-layout"><form className="panel v2-contact-form" onSubmit={e => e.preventDefault()}><div><span className="v2-overline">Enquiry form</span><h2>Send a message</h2></div>{['Name','Email','Phone','Subject'].map(x => <label key={x}>{x}<input placeholder={`Enter ${x.toLowerCase()}`}/></label>)}<label>Message<textarea rows={5} placeholder="Enter your message"/></label><Button>Submit enquiry</Button></form><aside className="v2-contact-aside"><span className="v2-overline light">Contact information</span><h2>Official details will be published after confirmation.</h2><p><Mail size={16}/> Email placeholder</p><p><Phone size={16}/> Phone placeholder</p><p><MapPin size={16}/> Freetown, Sierra Leone</p></aside></section>}
     </Shell>
   )
 }
@@ -89,24 +76,34 @@ export function SimplePublicPage({ kind }: { kind: 'news'|'gallery'|'partners'|'
 export function AwardEditionPage() {
   return (
     <Shell>
-      <section className="page-hero">
-        <Pill tone="gold">{eventDetails.edition} · 2026</Pill>
-        <h1>{eventDetails.title}</h1>
-        <p>A dedicated edition page for nominees, public voting, ceremony information, ticketing and results.</p>
-        <div className="hero-actions"><Link className="button" href="/vote">Vote now <ArrowUpRight size={16}/></Link><Link className="button secondary" href="/events/50misa-2026/tickets">Buy tickets</Link></div>
+      <section className="v2-award-hero">
+        <div className="v2-award-hero-copy">
+          <span className="v2-overline light">Current Award · 2026</span>
+          <Pill tone="gold">{eventDetails.edition}</Pill>
+          <h1>{eventDetails.title}</h1>
+          <p>A dedicated edition experience for nominee discovery, public voting, ceremony information and ticketing.</p>
+          <div className="hero-actions"><Link className="button light" href="/vote">Vote now <ArrowUpRight size={15}/></Link><Link className="v2-light-outline" href="/events/50misa-2026/tickets">Ceremony tickets <Ticket size={15}/></Link></div>
+          <div className="v2-award-facts"><span><CalendarDays size={16}/><small>Date</small><b>{eventDetails.date}</b></span><span><Clock3 size={16}/><small>Time</small><b>{eventDetails.time}</b></span><span><MapPin size={16}/><small>Venue</small><b>{eventDetails.location}</b></span></div>
+        </div>
+        <div className="v2-award-artwork"><Image src={eventDetails.artwork} alt="Official campaign artwork for the 50 Most Influential Students' Award – Sierra Leone 2026" fill sizes="(max-width: 900px) 100vw, 480px" className="v2-award-artwork-image" priority/><span>Official campaign artwork</span></div>
       </section>
-      <section className="section two-col">
-        <div><SectionHeading label="Ceremony" title={<>2026 ceremony <em>information.</em></>}/><p>{eventDetails.date} · {eventDetails.time}</p><p>{eventDetails.location}</p></div>
-        <div className="panel"><Pill tone="teal">Voting interface · Demo</Pill><h3>Nominee directory</h3><p>Browse representative nominee profiles and open the public voting experience.</p><Link className="text-button" href="/nominees">Browse nominees <ArrowUpRight size={15}/></Link></div>
+
+      <section className="section v2-award-overview">
+        <div><Pill>Award Experience</Pill><h2 className="v2-editorial-heading">One edition. Connected participation.</h2><p>The award edition brings nominees, public voting and ceremony access into one consistent digital experience.</p></div>
+        <div className="v2-award-feature-list"><article><Award size={18}/><div><strong>Nominee directory</strong><p>Browse approved nominees by code and category.</p></div></article><article><ShieldCheck size={18}/><div><strong>Public voting</strong><p>Structured vote selection and checkout workflow.</p></div></article><article><Ticket size={18}/><div><strong>Ceremony ticketing</strong><p>Configurable fixed-price and donation ticket tiers.</p></div></article></div>
+      </section>
+
+      <section className="section section-surface v2-section-surface">
+        <SectionHeading label="Nominee Directory" title={<>Representative nominees</>} copy="Demo records are used in this frontend preview until approved nominee data is connected."/>
+        <div className="nominee-grid v2-nominee-grid">{nominees.map(n => <NomineeCard nominee={n} key={n.code}/>)}</div>
+        <div className="section-cta"><Link className="button secondary" href="/nominees">Browse all nominees</Link></div>
+      </section>
+
+      <section className="section v2-ticket-tier-section">
+        <SectionHeading label="Ceremony Tickets" title={<>2026 ticket tiers</>} copy="These are event ticket tier names only and are not nominee academic classifications."/>
+        <div className="v2-ticket-tier-table">{ticketTiers.map((tier, i) => <div key={tier.name}><span>{String(i+1).padStart(2,'0')}</span><strong>{tier.name}</strong><b>{tier.displayPrice}</b><small>{tier.state}</small></div>)}</div>
+        <div className="section-cta"><Link className="button" href="/events/50misa-2026/tickets">Choose ceremony tickets</Link></div>
       </section>
     </Shell>
   )
-}
-
-export function NomineesPage() {
-  return <Shell><section className="page-hero"><Pill tone="teal">Nominee Directory</Pill><h1>2026 award <em>nominees.</em></h1><p>Representative nominee data is used in this frontend preview.</p></section><section className="section nominee-grid">{nominees.map(n => <NomineeCard key={n.code} nominee={n}/>)}</section></Shell>
-}
-
-export function EventsPage() {
-  return <Shell><section className="page-hero"><Pill tone="teal">Events</Pill><h1>Events, ceremonies and <em>public programmes.</em></h1><p>Browse event information, availability and ticketing options.</p></section><section className="section event-grid">{events.map(e => <EventCard key={e.slug} event={e}/>)}</section></Shell>
 }
