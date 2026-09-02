@@ -1,2 +1,2 @@
-import { TicketsScreen } from '@/components/ticketing/ticketing'
-export default function TicketsPage() { return <TicketsScreen /> }
+import { redirect } from 'next/navigation'
+export default function TicketsPage() { redirect('/events/50misa-2026/tickets') }

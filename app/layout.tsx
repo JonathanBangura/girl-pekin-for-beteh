@@ -5,12 +5,11 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'Girl Pikin For Betteh Foundation',
   description: 'Backing girls across Sierra Leone to learn, lead and build better futures.',
-  generator: 'v0.app',
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#f7f6f1',
+  themeColor: '#0f302d',
   userScalable: true,
 }
 
