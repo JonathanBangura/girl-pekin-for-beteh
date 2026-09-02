@@ -4,12 +4,12 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Girl Pikin For Betteh Foundation',
-  description: 'Backing girls across Sierra Leone to learn, lead and build better futures.',
+  description: 'Programmes, awards, events and public engagement platform for Girl Pikin For Betteh Foundation.',
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#0f302d',
+  themeColor: '#0b2d28',
   userScalable: true,
 }
 
