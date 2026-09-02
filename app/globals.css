@@ -1453,3 +1453,623 @@ h1 em,h2 em { color:inherit; font-style:normal; }
   .v3-work-visual { height:190px; }
   .v3-participation-items span { font-size:10px; }
 }
+
+/* =========================================================
+   PROFESSIONAL V4 — READABILITY & UX PASS
+   Purpose: improve legibility, hierarchy, density and contrast
+   without changing the approved V3 green + warm-gold direction.
+   ========================================================= */
+
+:root {
+  --muted-foreground: #50635d;
+  --ui-text: #173b3a;
+  --ui-subtle: #526660;
+  --ui-border-strong: #cfd8d2;
+}
+
+body {
+  font-size: 16px;
+  line-height: 1.62;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Global interaction readability */
+.button,
+.portal-link,
+.text-button,
+.vote-link {
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.button {
+  min-height: 44px;
+  padding: 12px 20px;
+}
+
+.button.compact {
+  min-height: 38px;
+  font-size: 13px;
+  padding: 9px 14px;
+}
+
+.pill {
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  padding: 7px 11px;
+}
+
+/* ---------- PUBLIC WEBSITE ---------- */
+.site-header nav,
+.v2-site-header .desktop-nav a {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.brand,
+.v2-brand .brand-copy strong {
+  font-size: 13px;
+}
+
+.brand-copy small,
+.v2-brand .brand-copy small {
+  font-size: 10.5px;
+  line-height: 1.25;
+}
+
+.v2-home-hero-copy > p,
+.v3-home-hero-copy > p,
+.section-heading > p,
+.section-intro p,
+.v2-section-heading > p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ui-subtle);
+}
+
+.v3-kicker,
+.v2-overline,
+.v2-admin-eyebrow,
+.v3-work-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .09em;
+}
+
+.v3-hero-note {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.v3-work-visual > span,
+.v3-work-visual > small {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.v3-work-copy h3 {
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.v3-work-copy p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ui-subtle);
+}
+
+.v3-work-copy a,
+.v3-award-link {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.v3-award-facts dt {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.v3-award-facts dd {
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.v3-participation-items span {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.v3-participation-items b {
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.nominee-code {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.v2-nominee-identity h3,
+.nominee-card h3 {
+  font-weight: 750;
+}
+
+.v2-nominee-identity p,
+.nominee-card > p,
+.v2-nominee-meta strong {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.event-card p,
+.v2-event-card p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.event-card footer,
+.v2-event-card footer {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.event-date span,
+.v2-event-card .event-date span {
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.v2-event-card .event-date span small {
+  font-size: 10px;
+}
+
+.v2-capability-grid p,
+.v2-program-list p,
+.v2-award-feature-list p,
+.v2-event-ticket-preview > div:first-child > p,
+.v2-profile-heading > p,
+.v2-vote-aside p {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.v2-capability-grid a,
+.v2-award-feature-list strong,
+.v2-ticket-tier-table small,
+.v2-ticket-mini-table > div,
+.v2-awards-mini-facts {
+  font-size: 12px;
+}
+
+.v2-footer .footer-brand p,
+.footer-brand p {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.v2-footer .footer-links strong,
+.footer-links strong {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.v2-footer .footer-links a,
+.footer-links a,
+.footer small {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- ADMIN + NOMINEE PORTALS ---------- */
+.portal-side {
+  width: 255px;
+}
+
+.portal-workspace-badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+
+.side-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #c2d6cf;
+  letter-spacing: .11em;
+}
+
+.portal-side a,
+.portal-side > button {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #d0e0da;
+  min-height: 42px;
+}
+
+.portal-side a.side-active,
+.portal-side > button.side-active {
+  font-weight: 750;
+  color: #fff;
+}
+
+.side-bottom,
+.side-bottom > a {
+  font-size: 12px;
+}
+
+.portal-user-row b {
+  font-size: 12.5px;
+  font-weight: 750;
+}
+
+.portal-user-row small {
+  font-size: 11px;
+  line-height: 1.35;
+  color: #b9d0c8;
+}
+
+.portal-header {
+  min-height: 76px;
+}
+
+.portal-header .crumb,
+.crumb {
+  font-size: 13px;
+  font-weight: 650;
+  color: #536760;
+}
+
+.environment-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+}
+
+.portal-header .button {
+  font-size: 12.5px;
+}
+
+.portal-content {
+  max-width: 1180px;
+}
+
+.v2-dashboard-head h1,
+.v2-admin-page-head h1,
+.portal-title h1 {
+  letter-spacing: -.025em;
+}
+
+.v2-dashboard-head p,
+.v2-admin-page-head p,
+.portal-title p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ui-subtle);
+}
+
+.v2-dashboard-status {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.v2-kpi-grid span,
+.v2-admin-stats span,
+.stat-box span {
+  font-size: 11.5px;
+  font-weight: 750;
+  color: #4d615a;
+}
+
+.v2-kpi-grid strong,
+.v2-admin-stats strong,
+.stat-box strong {
+  font-weight: 750;
+}
+
+.v2-kpi-grid small,
+.v2-admin-stats small,
+.stat-box small {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #64776f;
+}
+
+.v2-card-head h2,
+.panel-heading h2,
+.v2-dashboard-actions h2 {
+  font-weight: 750;
+  letter-spacing: -.02em;
+}
+
+.v2-chart-footer {
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.v2-attention-list b,
+.v2-quick-action-grid b {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 750;
+}
+
+.v2-attention-list small,
+.v2-quick-action-grid small {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #64776f;
+}
+
+.v2-queue-count {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+/* Admin tables: minimum readable data density */
+.responsive-table th,
+.v2-responsive-table th,
+.v2-activity-table .head,
+.v2-document-table .head {
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 800;
+  letter-spacing: .045em;
+  color: #53665f;
+  text-transform: uppercase;
+}
+
+.responsive-table td,
+.v2-responsive-table td,
+.v2-activity-table > div,
+.v2-document-table > div {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.v2-activity-table b,
+.table-row b,
+.table-row > strong {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.table-row small,
+.v2-activity-table small {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.responsive-table th,
+.responsive-table td,
+.v2-responsive-table th,
+.v2-responsive-table td {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.v2-table-footer,
+.v2-table-footer button,
+.v2-table-footer b {
+  font-size: 11px;
+}
+
+/* Admin filters / form controls */
+.v2-admin-toolbar-actions input,
+.v2-directory-toolbar input,
+.v2-directory-toolbar select,
+.panel-heading select,
+input,
+select,
+textarea {
+  font-size: 14px;
+}
+
+.v2-admin-toolbar-actions input,
+.v2-directory-toolbar input,
+.v2-directory-toolbar select,
+.v2-form-preview-grid input,
+.v2-form-preview-grid textarea,
+.v2-contact-form input,
+.v2-contact-form textarea,
+.v2-contact-form select {
+  min-height: 44px;
+}
+
+.v2-form-preview-grid label,
+.v2-contact-form label,
+.form-grid label,
+.form-field {
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.v2-form-note,
+.action-panel p,
+.checkout-form-card > p {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Nominee portal */
+.v2-nominee-account-card > p,
+.v2-nominee-summary-card > p,
+.v2-campaign-link-card > p,
+.nominee-detail-panel p,
+.nominee-tools-panel p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.v2-nominee-account-card dt,
+.v2-campaign-link-card dt,
+.v2-nominee-summary-card dt,
+.v2-performance-breakdown > div span,
+.pass-meta span,
+.v2-pass-ticket span {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .045em;
+}
+
+.v2-nominee-account-card dd,
+.v2-campaign-link-card dd,
+.v2-nominee-summary-card dd,
+.v2-performance-breakdown > div small {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.v2-announcement-list h3 {
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.v2-announcement-list p,
+.notice-list p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.v2-announcement-list small,
+.v2-announcement-list time,
+.document-list small,
+.v2-pass-notes p,
+.v2-pass-notes li {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.document-list strong,
+.v2-pass-identity strong,
+.v2-pass-ticket strong {
+  font-size: 13px;
+}
+
+/* Voting + ticketing */
+.transaction-meta span,
+.transaction-security,
+.transaction-section-title > span,
+.ticket-select-label,
+.summary-total span,
+.money-input span,
+.payment-placeholder strong {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.transaction-section-title p,
+.summary-line,
+.nominee-vote-profile > p,
+.checkout-form-card > p {
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.ticket-type-card small,
+.summary-total small,
+.payment-placeholder span,
+.secure-note {
+  font-size: 10.5px !important;
+  line-height: 1.4;
+}
+
+.professional-quantity b,
+.vote-quick-grid button {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.vote-quick-grid button {
+  min-height: 42px;
+}
+
+/* Scanner: event-day legibility is intentionally larger */
+.scanner-header-status {
+  font-size: 11px !important;
+  font-weight: 800;
+}
+
+.professional-scanner .scanner-heading p,
+.professional-scan-frame small,
+.professional-recent-scans > div a,
+.professional-recent-scans p strong {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.professional-scan-frame strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.scanner-divider {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.scan-detail-grid span {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .04em;
+}
+
+.scan-detail-grid strong {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Better focus visibility for keyboard users */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #f2aa00;
+  outline-offset: 2px;
+}
+
+/* ---------- MOBILE READABILITY ---------- */
+@media (max-width: 800px) {
+  body { font-size: 16px; }
+
+  .site-header { min-height: 72px; }
+  .mobile-nav > a { font-size: 16px; font-weight: 700; min-height: 44px; display:flex; align-items:center; }
+
+  .v2-home-hero-copy > p,
+  .v3-home-hero-copy > p,
+  .section-heading > p,
+  .section-intro p,
+  .v2-section-heading > p { font-size: 15px; }
+
+  .portal-side { width: min(86vw, 300px); }
+  .portal-side a { font-size: 14px; min-height: 45px; }
+  .side-label { font-size: 11px; }
+  .portal-header .crumb { font-size: 12px; }
+
+  .portal-content { padding-left: 20px; padding-right: 20px; }
+  .v2-dashboard-head p,
+  .v2-admin-page-head p,
+  .portal-title p { font-size: 14px; }
+
+  .v2-kpi-grid span,
+  .v2-admin-stats span { font-size: 11px; }
+  .v2-kpi-grid small,
+  .v2-admin-stats small { font-size: 11px; }
+
+  .v2-responsive-table th,
+  .responsive-table th { font-size: 11px; }
+  .v2-responsive-table td,
+  .responsive-table td { font-size: 13px; }
+
+  input, select, textarea { font-size: 16px; }
+
+  .professional-scanner .scanner-heading p { font-size: 13px; }
+  .professional-scan-frame strong { font-size: 15px; }
+  .scan-detail-grid strong { font-size: 13px; }
+}
