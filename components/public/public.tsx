@@ -12,9 +12,7 @@ import {
   FileText,
   MapPin,
   Menu,
-  ShieldCheck,
   Ticket,
-  Users,
   X,
 } from 'lucide-react'
 import { nominees, events, eventDetails } from '@/lib/mock-data'
@@ -150,28 +148,28 @@ export function PublicHome() {
     <>
       <PublicHeader />
       <main id="top" className="v2-public-home">
-        <section className="v2-home-hero">
-          <div className="v2-home-hero-copy">
-            <span className="v2-overline">Girl Pikin For Betteh Foundation</span>
-            <h1>A trusted digital platform for programmes, recognition and events.</h1>
-            <p>Bringing public information, award participation, voting, ticketing and event operations into one structured experience.</p>
-            <div className="hero-actions">
-              <Link className="button" href="/about">Explore the Foundation <ArrowRight size={15}/></Link>
-              <Link className="button secondary" href="/awards">View Awards</Link>
+        <section className="v2-home-hero v3-home-hero">
+          <div className="v2-home-hero-copy v3-home-hero-copy">
+            <span className="v3-kicker"><i /> Girl Pikin For Betteh Foundation</span>
+            <h1>Creating opportunity. <em>Recognising excellence.</em> Building a better future.</h1>
+            <p>Explore the foundation’s programmes, awards, events and opportunities to participate through one clear digital experience.</p>
+            <div className="hero-actions v3-hero-actions">
+              <Link className="button v3-gold-button" href="/programs">Explore our work <ArrowRight size={15}/></Link>
+              <Link className="button v3-outline-button" href="/awards/50misa-2026">2026 Award <ArrowUpRight size={14}/></Link>
             </div>
-            <div className="v2-hero-proof">
-              <span><ShieldCheck size={16}/><b>Structured</b><small>Clear public and operational workflows</small></span>
-              <span><Users size={16}/><b>Accessible</b><small>Designed for public and participant use</small></span>
-              <span><FileText size={16}/><b>Accountable</b><small>Built for records, reporting and review</small></span>
+            <div className="v3-hero-note">
+              <span>Programmes</span><b>•</b><span>Recognition</span><b>•</b><span>Public participation</span>
             </div>
           </div>
 
-          <aside className="v2-campaign-feature">
-            <div className="v2-campaign-image-wrap">
-              <Image src={eventDetails.artwork} alt="50 Most Influential Students' Award – Sierra Leone 2026 official campaign artwork" fill sizes="(max-width: 800px) 100vw, 520px" className="v2-campaign-image" priority />
+          <aside className="v2-campaign-feature v3-campaign-feature">
+            <div className="v3-gold-offset" aria-hidden="true" />
+            <div className="v2-campaign-image-wrap v3-campaign-image-wrap">
+              <Image src={eventDetails.artwork} alt="50 Most Influential Students' Award – Sierra Leone 2026 official campaign artwork" fill sizes="(max-width: 800px) 100vw, 560px" className="v2-campaign-image v3-campaign-image" priority />
+              <span className="v3-image-tag">Featured · 2026</span>
             </div>
-            <div className="v2-campaign-summary">
-              <div><span className="v2-overline light">Current award · 2026</span><h2>{eventDetails.title}</h2><p>{eventDetails.edition}</p></div>
+            <div className="v2-campaign-summary v3-campaign-summary">
+              <div><span className="v2-overline light">Current award</span><h2>{eventDetails.title}</h2><p>{eventDetails.edition}</p></div>
               <div className="v2-campaign-details">
                 <span><CalendarDays size={16}/><small>Date</small><b>{eventDetails.date}</b></span>
                 <span><MapPin size={16}/><small>Venue</small><b>{eventDetails.location}</b></span>
@@ -181,26 +179,46 @@ export function PublicHome() {
           </aside>
         </section>
 
-        <section className="v2-institution-strip" aria-label="Platform sections">
+        <section className="v2-institution-strip v3-institution-strip" aria-label="Platform sections">
           <span>Programs & Initiatives</span><i />
           <span>Awards & Recognition</span><i />
           <span>Public Voting</span><i />
           <span>Events & Ticketing</span>
         </section>
 
-        <section className="section v2-current-priority">
-          <div className="v2-priority-copy">
-            <Pill tone="gold">Current Priority</Pill>
-            <h2>50 Most Influential Students&apos; Award – Sierra Leone</h2>
-            <p>The 6th Edition has a dedicated experience for nominee discovery, public voting and ceremony ticketing.</p>
-            <div className="v2-priority-actions"><Link className="button" href="/nominees">Browse nominees</Link><Link className="button secondary" href="/vote">Public voting</Link></div>
+        <section className="section v3-work-section">
+          <SectionHeading label="What We Do" title={<>Purposeful work. Visible recognition. Meaningful participation.</>} copy="A connected public experience for the foundation’s programme work, award initiatives and events." />
+          <div className="v3-work-grid">
+            <article>
+              <div className="v3-work-visual green"><span>01</span><FileText size={36}/><small>Programme-ready photography area</small></div>
+              <div className="v3-work-copy"><span className="v3-work-label">Programs</span><h3>Programmes & initiatives</h3><p>Discover approved initiatives, updates and opportunities to engage with the foundation’s work.</p><Link href="/programs">Explore programs <ArrowUpRight size={14}/></Link></div>
+            </article>
+            <article>
+              <div className="v3-work-visual gold"><span>02</span><Award size={36}/><small>Award & recognition experiences</small></div>
+              <div className="v3-work-copy"><span className="v3-work-label">Awards</span><h3>Recognition & excellence</h3><p>Explore award editions, nominees, public voting and ceremony information in one place.</p><Link href="/awards">Explore awards <ArrowUpRight size={14}/></Link></div>
+            </article>
+            <article>
+              <div className="v3-work-visual dark"><span>03</span><CalendarDays size={36}/><small>Event-ready photography area</small></div>
+              <div className="v3-work-copy"><span className="v3-work-label">Events</span><h3>Events & participation</h3><p>View upcoming events, ticket options and the information needed to participate confidently.</p><Link href="/events">Explore events <ArrowUpRight size={14}/></Link></div>
+            </article>
           </div>
-          <dl className="v2-priority-facts">
-            <div><dt>Edition</dt><dd>6th Edition</dd></div>
-            <div><dt>Ceremony</dt><dd>21 November 2026</dd></div>
-            <div><dt>Venue</dt><dd>Freetown City Hall</dd></div>
-            <div><dt>Time</dt><dd>5:00 PM</dd></div>
-          </dl>
+        </section>
+
+        <section className="v3-award-band">
+          <div className="v3-award-band-inner">
+            <div className="v3-award-band-copy">
+              <span className="v3-kicker light"><i /> Featured Award · 2026</span>
+              <h2>50 Most Influential Students&apos; Award – Sierra Leone</h2>
+              <p>The 6th Edition has a dedicated experience for nominee discovery, public voting and ceremony ticketing.</p>
+              <div className="v3-award-actions"><Link className="button v3-gold-button" href="/nominees">Browse nominees</Link><Link className="button v3-dark-outline" href="/vote">Vote now</Link><Link className="v3-award-link" href="/events/50misa-2026/tickets">Buy ceremony tickets <ArrowUpRight size={14}/></Link></div>
+            </div>
+            <dl className="v3-award-facts">
+              <div><dt>Edition</dt><dd>6th Edition</dd></div>
+              <div><dt>Ceremony</dt><dd>21 November 2026</dd></div>
+              <div><dt>Venue</dt><dd>Freetown City Hall</dd></div>
+              <div><dt>Time</dt><dd>5:00 PM</dd></div>
+            </dl>
+          </div>
         </section>
 
         <section className="section section-surface v2-section-surface">
@@ -209,12 +227,13 @@ export function PublicHome() {
           <div className="section-cta"><Link className="button secondary" href="/nominees">View nominee directory <ChevronRight size={15}/></Link></div>
         </section>
 
-        <section className="section v2-capabilities-section">
-          <SectionHeading label="Platform Areas" title={<>One organization. Clear digital experiences.</>} copy="The public website and operational portals share one consistent design and information structure." />
-          <div className="v2-capability-grid">
-            <article><span><FileText size={19}/></span><small>01</small><h3>Programs</h3><p>Publish approved programme information, updates and media in a structured format.</p><Link href="/programs">Explore programs <ArrowUpRight size={14}/></Link></article>
-            <article><span><Award size={19}/></span><small>02</small><h3>Awards</h3><p>Manage award editions, nominees, voting, results and campaign information.</p><Link href="/awards">Explore awards <ArrowUpRight size={14}/></Link></article>
-            <article><span><CalendarDays size={19}/></span><small>03</small><h3>Events</h3><p>Present events, ticket tiers and event-day check-in through a connected flow.</p><Link href="/events">Explore events <ArrowUpRight size={14}/></Link></article>
+        <section className="v3-participation-band">
+          <div><span className="v2-overline light">One connected experience</span><h2>Discover. Participate. Celebrate.</h2></div>
+          <div className="v3-participation-items">
+            <span><b>01</b> Discover programmes</span>
+            <span><b>02</b> Meet nominees</span>
+            <span><b>03</b> Vote securely</span>
+            <span><b>04</b> Attend events</span>
           </div>
         </section>
 
