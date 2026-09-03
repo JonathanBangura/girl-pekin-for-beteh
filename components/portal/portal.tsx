@@ -93,7 +93,18 @@ const nomineeLinks: readonly NavItem[] = [
 ]
 
 function active(path: string, href: string) {
-  if (href === '/admin' || href === '/nominee') return path === href
+  const exactOnly = new Set([
+    '/admin',
+    '/nominee',
+    '/admin/awards',
+    '/admin/events',
+    '/admin/finance',
+  ])
+
+  if (exactOnly.has(href)) {
+    return path === href
+  }
+
   return path === href || path.startsWith(`${href}/`)
 }
 
@@ -225,7 +236,7 @@ export function PortalDashboard({ admin = false }: { admin?: boolean }) {
     <div className="portal-content v2-dashboard-page">
       <div className="v2-dashboard-head">
         <div><span className="v2-admin-eyebrow">Operations Overview</span><h1>Administration dashboard</h1><p>Monitor the active award edition, public participation, event operations and payment activity.</p></div>
-        <div className="v2-dashboard-head-actions"><span className="v2-dashboard-status"><span className="live-indicator"/> Frontend preview</span><Link className="button" href="/admin/awards/nominees">Manage nominees</Link></div>
+        <Link className="button" href="/admin/awards/nominees">Manage nominees</Link></div>
       </div>
 
       <div className="v2-kpi-grid">{operationalStats.map(([label,value,note]) => <article key={label}><span>{label}</span><strong>{value}</strong><small>{note}</small></article>)}</div>
