@@ -476,11 +476,11 @@ h1 em,h2 em { color:var(--primary); font-style:normal; }
 .live-indicator { width:7px; height:7px; border-radius:50%; background:#68c49b; box-shadow:0 0 0 4px rgba(104,196,155,.1); }
 .professional-scanner .scanner-body { max-width:640px; padding-top:48px; }
 .professional-scanner .scanner-heading h1 { font-size:38px; margin:14px 0 7px; color:#fff; }
-.professional-scanner .scanner-heading p { font-size:11px; }
+.professional-scanner .scanner-heading p { font-size:14px; color: #c8d9d5; }
 .scanner-workspace { margin-top:30px; padding:22px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.025); border-radius:13px; }
 .professional-scan-frame { width:100%; height:270px; margin:0; border-color:#4a716a; border-width:1px; color:#9cb4ae; }
-.professional-scan-frame strong { color:#dce7e4; font-size:11px; }
-.professional-scan-frame small { color:#6f8e87; font-size:9px; }
+.professional-scan-frame strong { color: #ffffff; font-size:16px; }
+.professional-scan-frame small { color: #a9c4bd; font-size:13px; }
 .scanner-divider { display:flex; align-items:center; gap:10px; color:#6d8a83; font-size:8px; text-transform:uppercase; letter-spacing:.1em; margin:18px 0; }
 .scanner-divider:before,.scanner-divider:after { content:""; height:1px; background:rgba(255,255,255,.08); flex:1; }
 .professional-manual { flex-direction:row; }
@@ -496,6 +496,11 @@ h1 em,h2 em { color:var(--primary); font-style:normal; }
 .professional-recent-scans { margin-top:28px; border-top:1px solid rgba(255,255,255,.08); padding-top:22px; }
 .professional-recent-scans > div a { color:#a9c1bb; font-size:9px; font-weight:700; }
 .professional-recent-scans p strong { font-size:9px; color:#d8e4e1; }
+.professional-recent-scans,
+.professional-recent-scans p,
+.professional-recent-scans a {
+  color: #c6d8d3;
+}
 
 @media (max-width:800px) {
   .transaction-header { display:block; }
@@ -994,13 +999,19 @@ h1 em,h2 em { color:inherit; font-style:normal; }
 .ticket-type-card.selected { border-color:#0c3d35; box-shadow:inset 0 0 0 1px #0c3d35; }
 
 /* Scanner */
-.professional-scanner { background:#071f1b; }
+.professional-scanner { background:#071f1b; color: #ffffff; }
 .professional-scanner header { border-bottom:1px solid rgba(255,255,255,.1); }
 .scanner-body { max-width:600px; }
 .professional-scan-frame { border-radius:6px; border-color:#b99654; background:#0a2923; }
 .professional-manual .scanner-search-field { border-radius:5px; }
 .scan-result { border-radius:7px; box-shadow:0 20px 55px rgba(0,0,0,.18); }
 .professional-recent-scans { border-top:1px solid rgba(255,255,255,.12); padding-top:25px; }
+.professional-scanner input {color: #ffffff;}
+.professional-scanner input::placeholder {
+  color: #9bb6af;
+  opacity: 1;
+}
+
 
 @media (max-width:1050px) {
   .v2-home-hero { grid-template-columns:1fr 420px; gap:42px; }
@@ -1773,6 +1784,13 @@ body {
 
 .v2-kpi-grid small,
 .v2-admin-stats small,
+.table-footer,
+.table-footer span {
+  color: #74837e;
+}
+
+.v2-kpi-grid small,
+.v2-admin-stats small,
 .stat-box small {
   font-size: 11px;
   line-height: 1.4;
@@ -2004,13 +2022,14 @@ textarea {
 }
 
 .professional-scan-frame strong {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
 }
 
 .scanner-divider {
   font-size: 11px;
   font-weight: 800;
+  color: #aac5be;
 }
 
 .scan-detail-grid span {
@@ -2069,7 +2088,53 @@ textarea:focus-visible {
 
   input, select, textarea { font-size: 16px; }
 
-  .professional-scanner .scanner-heading p { font-size: 13px; }
+  .professional-scanner .scanner-heading p { font-size: 13px; color: #c8d9d5; }
   .professional-scan-frame strong { font-size: 15px; }
   .scan-detail-grid strong { font-size: 13px; }
+}
+
+
+/* ==========================================================
+   ADMIN SIDEBAR — CLEANER VISUAL HIERARCHY
+   ========================================================== */
+
+.portal-nav-group a {
+  background: transparent !important;
+  color: #b9cfca !important;
+  border: 1px solid transparent;
+  font-weight: 650;
+  transition: background .15s ease, color .15s ease;
+}
+
+.portal-nav-group a:hover {
+  background: rgba(255,255,255,.06) !important;
+  color: #ffffff !important;
+}
+
+.portal-nav-group a.side-active {
+  background: #174f47 !important;
+  color: #ffffff !important;
+  border-color: rgba(255,255,255,.06);
+  box-shadow: inset 4px 0 0 #f2aa00;
+  font-weight: 800;
+}
+
+.portal-nav-group a.side-active svg {
+  color: #f2aa00;
+}
+
+.portal-nav-group {
+  margin-bottom: 22px;
+}
+
+.side-label {
+  margin-bottom: 8px;
+  color: #9bbab3;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.portal-workspace-badge {
+  background: rgba(255,255,255,.035);
+  border-color: rgba(255,255,255,.10);
 }
