@@ -8260,3 +8260,37 @@ textarea:focus-visible {
   background: rgba(255,255,255,.035);
   border-color: rgba(255,255,255,.10);
 }
+
+.portal-account {
+  display: grid;
+  gap: 10px;
+}
+
+.portal-signout-button {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 8px;
+  background: transparent;
+  color: #b9cfca;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.portal-signout-button:hover {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.16);
+  color: #ffffff;
+}
+
+.portal-signout-button:focus-visible {
+  outline: 3px solid rgba(242,170,0,.35);
+  outline-offset: 2px;
+}

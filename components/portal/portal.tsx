@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { PortalAccount } from '@/components/portal/portal-account'
 import { useState } from 'react'
 import {
   ArrowUpRight,
@@ -37,6 +38,7 @@ import {
 } from 'lucide-react'
 import { Brand } from '@/components/brand/brand'
 import { stats, bars } from '@/lib/mock-data'
+
 
 export function StatusBadge({ children, tone = '' }: { children: React.ReactNode; tone?: string }) {
   return <span className={`pill ${tone}`}>{children}</span>
@@ -147,7 +149,7 @@ export function PortalSidebar({ admin = false, open = false, onClose }: { admin?
       </div>
       <div className="side-bottom">
         <Link href="/" onClick={onClose}><ExternalLink size={15}/> View public site</Link>
-        <div className="portal-user-row"><span className="user-dot">{admin ? 'AD' : 'MK'}</span><span><b>{admin ? 'Aminata' : 'Mariama Koroma'}</b><small>{admin ? 'Administrator' : 'Nominee · 50MISA26001'}</small></span></div>
+        <PortalAccount />
       </div>
     </aside>
   )
