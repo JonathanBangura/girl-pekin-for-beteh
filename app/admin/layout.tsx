@@ -1,2 +1,12 @@
 import { PortalLayout } from '@/components/portal/portal'
-export default function AdminLayout({ children }: { children: React.ReactNode }) { return <PortalLayout admin>{children}</PortalLayout> }
+import { requirePermission } from '@/lib/auth/guards'
+
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  await requirePermission('admin.access', '/admin')
+
+  return <PortalLayout admin>{children}</PortalLayout>
+}
