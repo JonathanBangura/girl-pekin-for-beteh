@@ -8294,3 +8294,251 @@ textarea:focus-visible {
   outline: 3px solid rgba(242,170,0,.35);
   outline-offset: 2px;
 }
+/* ==========================================================
+   PHASE 3 — LIVE ADMIN DATA
+   ========================================================== */
+
+.live-data-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #cfe0da;
+  border-radius: 6px;
+  background: #eef6f3;
+  color: #0d5f50;
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .1em;
+}
+
+.live-edition-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 1px;
+  margin-top: 22px;
+  background: #dfe8e4;
+  border: 1px solid #dfe8e4;
+}
+
+.live-edition-summary > div {
+  display: grid;
+  gap: 6px;
+  min-height: 96px;
+  padding: 18px;
+  background: #fff;
+}
+
+.live-edition-summary span {
+  color: #71817b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.live-edition-summary strong {
+  color: #173a32;
+  font-size: 15px;
+}
+
+.live-empty-state {
+  padding: 30px;
+  border: 1px dashed #cdd9d5;
+  background: #fafcfb;
+  color: #52645d;
+}
+
+.live-empty-state.compact {
+  margin: 12px 0;
+  padding: 22px;
+}
+
+.live-empty-state strong {
+  display: block;
+  color: #183b33;
+  font-size: 15px;
+}
+
+.live-empty-state p,
+.live-empty-copy {
+  margin: 6px 0 0;
+  color: #71817b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.live-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.live-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+
+.live-admin-table th {
+  padding: 14px 15px;
+  border-bottom: 1px solid #dce5e1;
+  background: #f7f9f8;
+  color: #536861;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.live-admin-table td {
+  padding: 16px 15px;
+  border-bottom: 1px solid #e5ebe8;
+  color: #344b44;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.live-admin-table td strong {
+  display: block;
+  color: #173a32;
+  font-size: 13.5px;
+}
+
+.live-admin-table td small {
+  display: block;
+  margin-top: 4px;
+  color: #7a8883;
+  font-size: 11.5px;
+}
+
+.live-status {
+  font-weight: 750;
+  color: #0d5f50;
+}
+
+.live-create-panel {
+  margin-bottom: 20px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.live-create-panel > summary {
+  display: flex;
+  align-items: center;
+  min-height: 54px;
+  padding: 0 18px;
+  cursor: pointer;
+  color: #0d5f50;
+  font-size: 14px;
+  font-weight: 850;
+  list-style: none;
+}
+
+.live-create-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.live-create-panel[open] > summary {
+  border-bottom: 1px solid #e1e8e5;
+}
+
+.live-admin-form {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.live-admin-form label {
+  display: grid;
+  gap: 7px;
+  color: #354e46;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.live-admin-form label small {
+  color: #798781;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.live-admin-form .full {
+  grid-column: 1 / -1;
+}
+
+.live-admin-form input,
+.live-admin-form select,
+.live-admin-form textarea {
+  width: 100%;
+  border: 1px solid #ccd8d4;
+  border-radius: 7px;
+  background: #fff;
+  color: #173a32;
+  padding: 11px 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.live-admin-form input,
+.live-admin-form select {
+  min-height: 44px;
+}
+
+.live-admin-form textarea {
+  resize: vertical;
+}
+
+.live-admin-form input:focus,
+.live-admin-form select:focus,
+.live-admin-form textarea:focus {
+  outline: 3px solid rgba(13,95,80,.12);
+  border-color: #0d5f50;
+}
+
+.live-admin-form .live-check {
+  display: flex;
+  align-items: center;
+  grid-template-columns: none;
+  gap: 9px;
+  align-self: end;
+  min-height: 44px;
+}
+
+.live-admin-form .live-check input {
+  width: 17px;
+  min-height: 17px;
+  height: 17px;
+}
+
+.live-form-message {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.live-form-message.success {
+  border: 1px solid #bcdace;
+  background: #eef8f4;
+  color: #0d5f50;
+}
+
+.live-form-message.error {
+  border: 1px solid #e4bcb4;
+  background: #fff3f0;
+  color: #8c352b;
+}
+
+@media (max-width: 760px) {
+  .live-edition-summary,
+  .live-admin-form {
+    grid-template-columns: 1fr;
+  }
+
+  .live-admin-form .full {
+    grid-column: auto;
+  }
+}

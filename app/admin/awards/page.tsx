@@ -1,2 +1,5 @@
-import { AdminPage } from '@/components/portal/admin-pages'
-export default function Page(){return <AdminPage section="Awards"/>}
+import { AwardsLivePage } from '@/components/portal/awards-live'
+
+export default function Page() {
+  return <AwardsLivePage />
+}

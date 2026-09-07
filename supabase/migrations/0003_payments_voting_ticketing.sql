@@ -273,7 +273,7 @@ as $$
     t.nominee_id,
     t.nominee_code,
     t.total_votes,
-    dense_rank() over (order by t.total_votes desc, t.nominee_code asc)::bigint
+    dense_rank() over (order by t.total_votes desc, t.nominee_code asc)::bigint as rank_position
   from totals t
   order by rank_position, t.nominee_code;
 $$;
