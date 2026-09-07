@@ -1,2 +1,12 @@
 import { PortalLayout } from '@/components/portal/portal'
-export default function NomineeLayout({ children }: { children: React.ReactNode }) { return <PortalLayout>{children}</PortalLayout> }
+import { requirePermission } from '@/lib/auth/guards'
+
+export default async function NomineeLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  await requirePermission('nominee.portal', '/nominee')
+
+  return <PortalLayout>{children}</PortalLayout>
+}
