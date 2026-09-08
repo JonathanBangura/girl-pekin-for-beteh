@@ -8542,3 +8542,343 @@ textarea:focus-visible {
     grid-column: auto;
   }
 }
+
+
+/* ==========================================================
+   PHASE 4 — PUBLIC AWARDS + NOMINEE MANAGEMENT / PORTAL
+   ========================================================== */
+
+.live-row-editor {
+  position: relative;
+}
+
+.live-row-editor > summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #cad8d3;
+  border-radius: 6px;
+  color: #0d5f50;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.live-row-editor > summary::-webkit-details-marker {
+  display: none;
+}
+
+.live-row-editor[open] {
+  min-width: 280px;
+}
+
+.live-row-editor.wide[open] {
+  min-width: 390px;
+}
+
+.live-row-form,
+.live-link-account form {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.live-row-form label,
+.live-link-account label {
+  display: grid;
+  gap: 6px;
+  color: #425a52;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.live-row-form input,
+.live-row-form select,
+.live-row-form textarea,
+.live-link-account input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #cad8d3;
+  border-radius: 6px;
+  padding: 9px 10px;
+  background: #fff;
+  color: #173a32;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.live-row-form textarea {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.live-management-stack {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #e0e7e4;
+  background: #fbfcfb;
+}
+
+.live-inline-actions,
+.live-quick-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.live-quick-status {
+  padding-top: 14px;
+  border-top: 1px solid #e3e9e6;
+}
+
+.live-quick-status > span,
+.live-link-account > span {
+  width: 100%;
+  color: #6e7e78;
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.live-link-account {
+  padding-top: 14px;
+  border-top: 1px solid #e3e9e6;
+}
+
+.live-link-account p {
+  margin: 6px 0 0;
+  color: #53675f;
+  font-size: 12px;
+}
+
+.live-public-nominee-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 18px;
+}
+
+.live-public-nominee-card {
+  overflow: hidden;
+  border: 1px solid #dce4e0;
+  background: #fff;
+}
+
+.live-public-nominee-image {
+  min-height: 230px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(145deg, rgba(13,95,80,.98), rgba(7,63,53,.98));
+  background-size: cover;
+  background-position: center;
+}
+
+.live-public-nominee-image > span {
+  color: #fff;
+  font-size: 52px;
+  font-weight: 850;
+  letter-spacing: -.04em;
+}
+
+.live-public-nominee-body {
+  padding: 20px;
+}
+
+.live-public-nominee-body h3 {
+  margin: 13px 0 6px;
+  color: #173a32;
+  font-size: 22px;
+}
+
+.live-public-nominee-body > p {
+  min-height: 42px;
+  margin: 0 0 16px;
+  color: #687770;
+  font-size: 14px;
+}
+
+.live-public-nominee-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e3e9e6;
+  color: #52675f;
+  font-size: 11.5px;
+  font-weight: 750;
+}
+
+.live-award-poster-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  background: #0d5f50;
+  color: #fff;
+}
+
+.live-award-poster-placeholder span {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.live-public-empty {
+  padding: 34px;
+  border: 1px dashed #ccd9d4;
+  background: #f8faf9;
+  color: #5f706a;
+  font-size: 14px;
+  text-align: center;
+}
+
+.live-voting-closed {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,.24);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.live-directory-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px,1.4fr) minmax(190px,.8fr) auto auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.live-directory-toolbar label {
+  display: grid;
+  gap: 6px;
+  color: #53675f;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.live-directory-toolbar input,
+.live-directory-toolbar select {
+  min-height: 44px;
+  border: 1px solid #cad7d2;
+  border-radius: 6px;
+  padding: 0 12px;
+  background: #fff;
+  color: #173a32;
+  font-size: 14px;
+}
+
+.live-directory-count {
+  margin: 0 0 18px;
+  color: #718079;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.live-profile-photo,
+.live-portal-avatar {
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.live-kpi-text {
+  font-size: 20px !important;
+  line-height: 1.15;
+}
+
+.live-nominee-portal-profile {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: start;
+  margin-top: 22px;
+}
+
+.live-nominee-portal-profile h3 {
+  margin: 0 0 5px;
+  color: #173a32;
+  font-size: 21px;
+}
+
+.live-nominee-portal-profile p {
+  margin: 0 0 18px;
+  color: #6b7a74;
+}
+
+.live-nominee-portal-profile dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.live-nominee-portal-profile dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 10px;
+  border-top: 1px solid #e2e8e5;
+}
+
+.live-nominee-portal-profile dt {
+  color: #718079;
+  font-size: 11px;
+}
+
+.live-nominee-portal-profile dd {
+  margin: 0;
+  color: #263f37;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.live-portal-event-card h2 {
+  margin: 9px 0 16px;
+}
+
+.live-portal-event-card p {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: #65766f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 980px) {
+  .live-public-nominee-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .live-directory-toolbar {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .live-public-nominee-grid,
+  .live-directory-toolbar,
+  .live-nominee-portal-profile {
+    grid-template-columns: 1fr;
+  }
+
+  .live-public-nominee-image {
+    min-height: 280px;
+  }
+
+  .live-row-editor.wide[open],
+  .live-row-editor[open] {
+    min-width: 250px;
+  }
+}

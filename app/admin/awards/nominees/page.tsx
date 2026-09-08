@@ -1,10 +1,23 @@
-import { NomineesLivePage } from '@/components/portal/awards-live'
+import { NomineesManagementPage } from '@/components/portal/awards-management-live'
 
 type PageProps = {
-  searchParams: Promise<{ created?: string; error?: string }>
+  searchParams: Promise<{
+    created?: string
+    updated?: string
+    linked?: string
+    error?: string
+  }>
 }
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams
-  return <NomineesLivePage created={params.created} error={params.error} />
+
+  return (
+    <NomineesManagementPage
+      created={params.created}
+      updated={params.updated}
+      linked={params.linked}
+      error={params.error}
+    />
+  )
 }

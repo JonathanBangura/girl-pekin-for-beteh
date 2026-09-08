@@ -1,10 +1,21 @@
-import { CategoriesLivePage } from '@/components/portal/awards-live'
+import { CategoriesManagementPage } from '@/components/portal/awards-management-live'
 
 type PageProps = {
-  searchParams: Promise<{ created?: string; error?: string }>
+  searchParams: Promise<{
+    created?: string
+    updated?: string
+    error?: string
+  }>
 }
 
 export default async function Page({ searchParams }: PageProps) {
   const params = await searchParams
-  return <CategoriesLivePage created={params.created} error={params.error} />
+
+  return (
+    <CategoriesManagementPage
+      created={params.created}
+      updated={params.updated}
+      error={params.error}
+    />
+  )
 }

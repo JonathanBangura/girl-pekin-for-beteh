@@ -1,2 +1,5 @@
-import { PortalDashboard } from '@/components/portal/portal'
-export default function NomineePage() { return <PortalDashboard /> }
+import { NomineeDashboardLive } from '@/components/portal/nominee-dashboard-live'
+
+export default function NomineePage() {
+  return <NomineeDashboardLive />
+}
