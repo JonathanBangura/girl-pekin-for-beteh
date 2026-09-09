@@ -119,7 +119,7 @@ export async function getAdminEventsData() {
     supabase
       .from('ticket_types')
       .select(
-        'id,event_id,name,pricing_type,price,min_donation,currency,capacity,sales_starts_at,sales_ends_at,max_per_order,admissions_per_unit,is_active,sort_order',
+        'id,event_id,name,description,pricing_type,price,min_donation,currency,capacity,sales_starts_at,sales_ends_at,max_per_order,admissions_per_unit,is_active,sort_order',
       )
       .order('sort_order', { ascending: true }),
     supabase

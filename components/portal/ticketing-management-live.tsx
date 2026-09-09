@@ -450,6 +450,15 @@ export async function TicketTypesManagementLivePage({
                             />
                           </label>
 
+                          <label className="full">
+                            Description
+                            <textarea
+                              name="description"
+                              rows={3}
+                              defaultValue={type.description ?? ''}
+                            />
+                          </label>
+
                           <label className="live-check">
                             <input
                               name="is_active"
