@@ -1,2 +1,5 @@
-import { AdminPage } from '@/components/portal/admin-pages'
-export default function Page(){return <AdminPage section="Events"/>}
+import { EventsManagementLivePage } from '@/components/portal/ticketing-management-live'
+
+export default function Page() {
+  return <EventsManagementLivePage />
+}

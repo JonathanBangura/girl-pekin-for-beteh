@@ -1,2 +1,5 @@
-import { AdminModule } from '@/components/portal/admin-module'
-export default function OrdersPage(){return <AdminModule title="Orders" eyebrow="Events"/>}
+import { TicketOrdersManagementLivePage } from '@/components/portal/ticketing-management-live'
+
+export default function OrdersPage() {
+  return <TicketOrdersManagementLivePage />
+}

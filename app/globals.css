@@ -9037,3 +9037,432 @@ textarea:focus-visible {
     grid-template-columns: 1fr;
   }
 }
+/* ==========================================================
+   MOBILE PRIORITY + PHASE 6A TICKETING
+   Mobile baseline: 360px / 390px / 430px first.
+   ========================================================== */
+
+.live-event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.live-event-card {
+  overflow: hidden;
+  border: 1px solid #dce4e0;
+  background: #fff;
+}
+
+.live-event-cover {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #0d5f50, #073f35);
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+}
+
+.live-event-card-body {
+  padding: 22px;
+}
+
+.live-event-card-body h2 {
+  margin: 13px 0 8px;
+  color: #173a32;
+  font-size: 26px;
+}
+
+.live-event-card-body > p {
+  color: #687770;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.live-event-meta {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+  padding-top: 14px;
+  border-top: 1px solid #e3e9e6;
+}
+
+.live-event-meta span {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  color: #52675f;
+  font-size: 12.5px;
+}
+
+.mobile-ticket-grid .ticket-type-card {
+  min-height: 165px;
+  text-align: left;
+}
+
+.mobile-ticket-grid .ticket-type-card p {
+  margin: 8px 0 0;
+  color: #718079;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mobile-ticket-quantity-input {
+  width: 82px;
+  border: 0;
+  background: transparent;
+  color: #173a32;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 850;
+  outline: none;
+  appearance: textfield;
+}
+
+.mobile-ticket-quantity-input::-webkit-inner-spin-button,
+.mobile-ticket-quantity-input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.mobile-ticket-checkout-form {
+  display: grid;
+  gap: 15px;
+  margin-top: 18px;
+}
+
+.mobile-ticket-checkout-form label {
+  display: grid;
+  gap: 7px;
+  color: #425a52;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mobile-ticket-checkout-form input {
+  min-height: 48px;
+  border: 1px solid #cad7d2;
+  border-radius: 7px;
+  padding: 0 12px;
+  background: #fff;
+  color: #173a32;
+  font-size: 16px;
+}
+
+.mobile-table-wrap {
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-row-editor > summary {
+  min-height: 42px;
+}
+
+.mobile-order-status {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .live-event-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-first-ticket-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-ticket-summary,
+  .professional-order-summary {
+    position: static !important;
+    top: auto !important;
+  }
+
+  .mobile-event-hero {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-event-poster {
+    min-height: 430px;
+  }
+
+  .mobile-ticket-preview {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 800px) {
+  /* Public transaction pages */
+  .mobile-transaction-page {
+    padding: 34px 18px 64px !important;
+  }
+
+  .mobile-transaction-page .transaction-header {
+    display: grid !important;
+    gap: 18px;
+    margin-bottom: 26px;
+  }
+
+  .mobile-transaction-page .transaction-header h1 {
+    font-size: clamp(2.35rem, 10vw, 3.2rem);
+    line-height: 1;
+  }
+
+  .mobile-transaction-page .transaction-header p {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .mobile-transaction-page .transaction-meta,
+  .mobile-transaction-page .transaction-security {
+    width: 100%;
+    margin-top: 0 !important;
+  }
+
+  .mobile-transaction-page .transaction-meta span {
+    min-height: 38px;
+    font-size: 13px;
+  }
+
+  .mobile-ticket-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px;
+  }
+
+  .mobile-ticket-summary {
+    padding: 22px !important;
+  }
+
+  .mobile-ticket-summary .summary-line {
+    gap: 14px;
+  }
+
+  .mobile-ticket-summary .summary-line strong {
+    text-align: right;
+  }
+
+  .mobile-quantity button,
+  .professional-quantity button {
+    min-width: 48px !important;
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .live-vote-quantity-input,
+  .mobile-ticket-quantity-input {
+    min-height: 48px;
+    font-size: 18px !important;
+  }
+
+  .live-vote-contact-form input,
+  .mobile-ticket-checkout-form input,
+  .live-admin-form input,
+  .live-admin-form select,
+  .live-admin-form textarea,
+  .live-row-form input,
+  .live-row-form select,
+  .live-row-form textarea,
+  .live-link-account input {
+    font-size: 16px !important;
+  }
+
+  .checkout-button {
+    min-height: 50px;
+    width: 100%;
+    font-size: 15px !important;
+  }
+
+  /* Phase 5A voting on mobile */
+  .vote-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px;
+  }
+
+  .vote-quick-grid button {
+    min-height: 48px !important;
+    font-size: 14px !important;
+  }
+
+  .live-voting-state-grid,
+  .live-order-status-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .live-vote-order-status {
+    padding: 22px !important;
+  }
+
+  /* Admin mobile */
+  .mobile-admin-page {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .mobile-admin-stats,
+  .v2-admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px;
+  }
+
+  .mobile-admin-form,
+  .live-admin-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-admin-form .full,
+  .live-admin-form .full {
+    grid-column: auto !important;
+  }
+
+  .mobile-table-wrap {
+    margin-inline: -2px;
+    padding-bottom: 8px;
+  }
+
+  .mobile-table-wrap .live-admin-table {
+    min-width: 720px;
+  }
+
+  .mobile-row-editor.wide[open],
+  .mobile-row-editor[open] {
+    min-width: min(360px, 78vw) !important;
+  }
+
+  .mobile-row-form {
+    gap: 14px;
+  }
+
+  .live-row-editor > summary {
+    min-height: 44px !important;
+    padding-inline: 12px !important;
+  }
+
+  /* Event mobile */
+  .mobile-section {
+    padding: 70px 18px !important;
+  }
+
+  .mobile-event-info {
+    grid-template-columns: 1fr !important;
+    gap: 1px !important;
+    padding: 0 18px 55px !important;
+  }
+
+  .mobile-event-info > div {
+    min-height: 84px;
+  }
+
+  .mobile-hero-actions {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .mobile-hero-actions .button,
+  .mobile-hero-actions a {
+    width: 100%;
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 600px) {
+  .mobile-ticket-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-ticket-grid .ticket-type-card {
+    min-height: 148px;
+    padding: 18px;
+  }
+
+  .mobile-event-poster {
+    min-height: 350px;
+  }
+
+  .live-event-cover {
+    min-height: 220px;
+  }
+
+  .live-event-card-body {
+    padding: 18px;
+  }
+
+  .live-event-card-body h2 {
+    font-size: 23px;
+  }
+
+  .mobile-ticket-summary .summary-line {
+    align-items: flex-start;
+  }
+
+  .mobile-ticket-summary .summary-line span,
+  .mobile-ticket-summary .summary-line strong {
+    font-size: 13px;
+  }
+
+  .mobile-money-input {
+    min-height: 48px;
+  }
+
+  .mobile-money-input input {
+    min-width: 0;
+    font-size: 16px !important;
+  }
+
+  .mobile-admin-stats,
+  .v2-admin-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-admin-stats article,
+  .v2-admin-stats article {
+    min-height: 92px;
+  }
+}
+
+@media (max-width: 430px) {
+  .mobile-transaction-page {
+    padding: 28px 14px calc(54px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mobile-section {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .mobile-transaction-page .transaction-header h1 {
+    font-size: 2.25rem;
+  }
+
+  .mobile-ticket-summary,
+  .mobile-checkout-card,
+  .live-vote-order-status {
+    padding: 18px !important;
+  }
+
+  .mobile-ticket-grid .ticket-type-card {
+    width: 100%;
+  }
+
+  .mobile-ticket-quantity-input,
+  .live-vote-quantity-input {
+    width: 72px;
+  }
+
+  .mobile-table-wrap .live-admin-table {
+    min-width: 680px;
+  }
+
+  .live-row-editor.wide[open],
+  .live-row-editor[open] {
+    min-width: min(330px, 82vw) !important;
+  }
+
+  .button,
+  button,
+  input,
+  select {
+    touch-action: manipulation;
+  }
+}
