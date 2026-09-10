@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
+import { VultPaymentMethodField } from '@/components/payments/vult-payment-method'
 
 export function LiveTicketCheckoutForm({
   eventSlug,
@@ -33,16 +34,27 @@ export function LiveTicketCheckoutForm({
         ticket_type_id: ticketTypeId,
         quantity,
         donation_per_ticket: donationPerTicket,
-        purchaser_name: String(formData.get('purchaser_name') ?? ''),
-        purchaser_email: String(formData.get('purchaser_email') ?? ''),
-        purchaser_phone: String(formData.get('purchaser_phone') ?? ''),
+        purchaser_name: String(
+          formData.get('purchaser_name') ?? '',
+        ),
+        purchaser_email: String(
+          formData.get('purchaser_email') ?? '',
+        ),
+        purchaser_phone: String(
+          formData.get('purchaser_phone') ?? '',
+        ),
+        payment_method: String(
+          formData.get('payment_method') ?? 'in-app',
+        ),
       }),
     })
 
     const body = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-      setMessage(body.error || 'Unable to create ticket order.')
+      setMessage(
+        body.error || 'Unable to create ticket payment.',
+      )
       setLoading(false)
       return
     }
@@ -52,7 +64,9 @@ export function LiveTicketCheckoutForm({
       return
     }
 
-    setMessage(body.message || 'Ticket order created.')
+    setMessage(
+      'Payment request created. Open the order status to continue.',
+    )
     setLoading(false)
   }
 
@@ -60,10 +74,14 @@ export function LiveTicketCheckoutForm({
     <section className="panel checkout-form-card mobile-checkout-card">
       <h2>Guest information</h2>
       <p>
-        Enter the primary purchaser details for the {ticketTypeName} order.
+        Enter the primary purchaser details for the{' '}
+        {ticketTypeName} order.
       </p>
 
-      <form onSubmit={submit} className="mobile-ticket-checkout-form">
+      <form
+        onSubmit={submit}
+        className="mobile-ticket-checkout-form"
+      >
         <label>
           Full name
           <input
@@ -96,8 +114,13 @@ export function LiveTicketCheckoutForm({
           Provide at least an email address or phone number.
         </p>
 
+        <VultPaymentMethodField disabled={loading} />
+
         {message && (
-          <div className="live-form-message error" role="alert">
+          <div
+            className="live-form-message error"
+            role="alert"
+          >
             {message}
           </div>
         )}
@@ -107,12 +130,14 @@ export function LiveTicketCheckoutForm({
           type="submit"
           disabled={loading}
         >
-          {loading ? 'Creating order…' : 'Create ticket order'}
+          {loading
+            ? 'Connecting to Vult…'
+            : 'Continue to Vult payment'}
         </button>
 
-        <p className="live-vult-warning">
-          Vult payment initiation is not enabled yet. No ticket is issued until
-          a verified successful payment is settled.
+        <p className="secure-note">
+          Payment is confirmed by Vult before the ticket order is
+          marked paid.
         </p>
       </form>
     </section>

@@ -9466,3 +9466,194 @@ textarea:focus-visible {
     touch-action: manipulation;
   }
 }
+/* ==========================================================
+   VULT PAYMENT INTEGRATION — MOBILE FIRST
+   ========================================================== */
+
+.vult-payment-method-field {
+  border: 0;
+  padding: 0;
+  margin: 6px 0 4px;
+}
+
+.vult-payment-method-field legend {
+  margin-bottom: 9px;
+  color: #425a52;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.vult-payment-method-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.vult-payment-method-card {
+  min-height: 92px;
+  display: grid !important;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 10px !important;
+  padding: 13px;
+  border: 1px solid #cad8d3;
+  border-radius: 8px;
+  background: #fff;
+  color: #173a32;
+  cursor: pointer;
+}
+
+.vult-payment-method-card:has(input:checked) {
+  border-color: #0d5f50;
+  box-shadow: 0 0 0 2px rgba(13, 95, 80, .10);
+  background: #f3faf7;
+}
+
+.vult-payment-method-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vult-method-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: #edf5f2;
+  color: #0d5f50;
+}
+
+.vult-payment-method-card b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.vult-payment-method-card small {
+  display: block;
+  color: #718079;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.vult-payment-status-card {
+  width: min(100%, 720px);
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.vult-payment-status-card > h1 {
+  margin: 12px 0 5px;
+  overflow-wrap: anywhere;
+}
+
+.vult-payment-status-card > p {
+  margin: 0 0 24px;
+  color: #66776f;
+}
+
+.vult-payment-success {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid #bcdace;
+  background: #eef8f4;
+  color: #0d5f50;
+}
+
+.vult-payment-success strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.vult-payment-success p {
+  margin: 0;
+  color: #46675e;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.vult-payment-code {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid #d8c784;
+  background: #fff9e9;
+}
+
+.vult-payment-code span,
+.vult-payment-code small {
+  display: block;
+}
+
+.vult-payment-code span {
+  margin-bottom: 7px;
+  color: #80662c;
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.vult-payment-code strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #2c3e38;
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  letter-spacing: .02em;
+  overflow-wrap: anywhere;
+}
+
+.vult-payment-code small {
+  color: #746b53;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.vult-refresh-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 14px 0;
+  color: #6a7a74;
+  font-size: 11.5px;
+}
+
+.vult-payment-status-card > .button {
+  margin-top: 10px;
+}
+
+@media (max-width: 700px) {
+  .vult-payment-method-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .vult-payment-method-card {
+    min-height: 76px;
+    align-items: center;
+  }
+
+  .vult-payment-status-card {
+    padding: 20px;
+  }
+
+  .vult-payment-status-card .checkout-button,
+  .vult-payment-status-card > .button {
+    width: 100%;
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 430px) {
+  .vult-payment-status-card {
+    padding: 18px;
+  }
+
+  .vult-payment-method-card {
+    padding: 12px;
+  }
+}

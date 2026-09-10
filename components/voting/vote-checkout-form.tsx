@@ -1,6 +1,7 @@
 'use client'
 
 import { FormEvent, useState } from 'react'
+import { VultPaymentMethodField } from '@/components/payments/vult-payment-method'
 
 export function VoteCheckoutForm({
   nomineeCode,
@@ -30,16 +31,27 @@ export function VoteCheckoutForm({
       body: JSON.stringify({
         nominee_code: nomineeCode,
         quantity,
-        buyer_name: String(formData.get('buyer_name') ?? ''),
-        buyer_email: String(formData.get('buyer_email') ?? ''),
-        buyer_phone: String(formData.get('buyer_phone') ?? ''),
+        buyer_name: String(
+          formData.get('buyer_name') ?? '',
+        ),
+        buyer_email: String(
+          formData.get('buyer_email') ?? '',
+        ),
+        buyer_phone: String(
+          formData.get('buyer_phone') ?? '',
+        ),
+        payment_method: String(
+          formData.get('payment_method') ?? 'in-app',
+        ),
       }),
     })
 
     const body = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-      setMessage(body.error || 'Unable to create vote order.')
+      setMessage(
+        body.error || 'Unable to create vote payment.',
+      )
       setLoading(false)
       return
     }
@@ -49,37 +61,63 @@ export function VoteCheckoutForm({
       return
     }
 
-    setMessage(body.message || 'Vote order created.')
+    setMessage(
+      'Payment request created. Open the order status to continue.',
+    )
     setLoading(false)
   }
 
   return (
     <section className="panel checkout-form-card">
       <h2>Contact information</h2>
-      <p>Used to identify and support the vote order for {nomineeName}.</p>
+      <p>
+        Used to identify and support the vote order for{' '}
+        {nomineeName}.
+      </p>
 
-      <form onSubmit={submit} className="live-vote-contact-form">
+      <form
+        onSubmit={submit}
+        className="live-vote-contact-form"
+      >
         <label>
           Full name
-          <input name="buyer_name" required />
+          <input
+            name="buyer_name"
+            autoComplete="name"
+            required
+          />
         </label>
 
         <label>
           Email address
-          <input name="buyer_email" type="email" />
+          <input
+            name="buyer_email"
+            type="email"
+            autoComplete="email"
+          />
         </label>
 
         <label>
           Phone number
-          <input name="buyer_phone" type="tel" placeholder="+232 ..." />
+          <input
+            name="buyer_phone"
+            type="tel"
+            autoComplete="tel"
+            placeholder="+232 ..."
+          />
         </label>
 
         <p className="secure-note">
           Provide at least an email address or phone number.
         </p>
 
+        <VultPaymentMethodField disabled={loading} />
+
         {message && (
-          <div className="live-form-message error" role="alert">
+          <div
+            className="live-form-message error"
+            role="alert"
+          >
             {message}
           </div>
         )}
@@ -89,12 +127,14 @@ export function VoteCheckoutForm({
           type="submit"
           disabled={loading}
         >
-          {loading ? 'Creating order…' : 'Create vote order'}
+          {loading
+            ? 'Connecting to Vult…'
+            : 'Continue to Vult payment'}
         </button>
 
-        <p className="live-vult-warning">
-          Vult payment initiation is intentionally not enabled yet. Creating an
-          order does not allocate votes or mark payment successful.
+        <p className="secure-note">
+          Votes are added only after Vult sends a verified
+          completed-payment webhook.
         </p>
       </form>
     </section>
