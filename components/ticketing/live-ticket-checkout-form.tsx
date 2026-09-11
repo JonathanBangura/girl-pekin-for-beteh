@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { VultPaymentMethodField } from '@/components/payments/vult-payment-method'
 
 export function LiveTicketCheckoutForm({
@@ -18,6 +18,22 @@ export function LiveTicketCheckoutForm({
 }) {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Browsers can restore this page from the back/forward cache with React
+  // state exactly as it was when the customer left. Reset transient submit
+  // state whenever the page becomes active again so the button never stays
+  // stuck on "Connecting to Vult…".
+  useEffect(() => {
+    function resetTransientPaymentState() {
+      setLoading(false)
+    }
+
+    window.addEventListener('pageshow', resetTransientPaymentState)
+
+    return () => {
+      window.removeEventListener('pageshow', resetTransientPaymentState)
+    }
+  }, [])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -52,7 +68,11 @@ export function LiveTicketCheckoutForm({
       return
     }
 
-    // Card should go directly to the Vult-provided card checkout page.
+    // Reset before leaving the page as an additional safeguard. If the browser
+    // later restores this checkout from BFCache, pageshow above resets it too.
+    setLoading(false)
+
+    // Card goes directly to the Vult-provided card checkout page.
     if (paymentMethod === 'card' && body.payment_url) {
       window.location.assign(body.payment_url)
       return
@@ -67,7 +87,6 @@ export function LiveTicketCheckoutForm({
     setMessage(
       'Payment request was created, but no payment instruction was returned.',
     )
-    setLoading(false)
   }
 
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import { VultPaymentMethodField } from '@/components/payments/vult-payment-method'
 
 export function VoteCheckoutForm({
@@ -17,6 +17,21 @@ export function VoteCheckoutForm({
 }) {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // Reset transient submit state when this page is restored from the browser's
+  // back/forward cache. Without this, returning from Vult can restore the
+  // checkout with loading=true and leave the button stuck.
+  useEffect(() => {
+    function resetTransientPaymentState() {
+      setLoading(false)
+    }
+
+    window.addEventListener('pageshow', resetTransientPaymentState)
+
+    return () => {
+      window.removeEventListener('pageshow', resetTransientPaymentState)
+    }
+  }, [])
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -49,6 +64,9 @@ export function VoteCheckoutForm({
       return
     }
 
+    // Clear loading before navigation and also reset it on pageshow above.
+    setLoading(false)
+
     if (paymentMethod === 'card' && body.payment_url) {
       window.location.assign(body.payment_url)
       return
@@ -62,7 +80,6 @@ export function VoteCheckoutForm({
     setMessage(
       'Payment request was created, but no payment instruction was returned.',
     )
-    setLoading(false)
   }
 
   return (
