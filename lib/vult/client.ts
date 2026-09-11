@@ -1,5 +1,6 @@
 import {
   constants,
+  createPrivateKey,
   createSign,
 } from 'node:crypto'
 
@@ -32,11 +33,36 @@ export class VultApiError extends Error {
   }
 }
 
+export class VultConfigurationError extends Error {
+  code: string
+
+  constructor(code: string, message: string) {
+    super(message)
+    this.name = 'VultConfigurationError'
+    this.code = code
+  }
+}
+
+export class VultTransportError extends Error {
+  code: string
+  cause?: unknown
+
+  constructor(code: string, message: string, cause?: unknown) {
+    super(message)
+    this.name = 'VultTransportError'
+    this.code = code
+    this.cause = cause
+  }
+}
+
 function required(name: string) {
   const value = process.env[name]?.trim()
 
   if (!value) {
-    throw new Error(`Missing required Vult environment variable: ${name}`)
+    throw new VultConfigurationError(
+      `MISSING_${name}`,
+      `Missing required Vult environment variable: ${name}`,
+    )
   }
 
   return value
@@ -44,20 +70,69 @@ function required(name: string) {
 
 function getPrivateKey() {
   const encoded = process.env.VULT_PRIVATE_KEY_BASE64?.trim()
+  const pem = process.env.VULT_PRIVATE_KEY_PEM?.trim()
+
+  let privateKeyPem = ''
 
   if (encoded) {
-    return Buffer.from(encoded, 'base64').toString('utf8')
+    try {
+      privateKeyPem = Buffer.from(encoded, 'base64').toString('utf8')
+    } catch (error) {
+      throw new VultConfigurationError(
+        'INVALID_PRIVATE_KEY_BASE64',
+        `VULT_PRIVATE_KEY_BASE64 could not be decoded: ${
+          error instanceof Error ? error.message : 'unknown decode error'
+        }`,
+      )
+    }
+  } else if (pem) {
+    privateKeyPem = pem.replace(/\\n/g, '\n')
+  } else {
+    throw new VultConfigurationError(
+      'MISSING_PRIVATE_KEY',
+      'Missing VULT_PRIVATE_KEY_BASE64 or VULT_PRIVATE_KEY_PEM.',
+    )
   }
 
-  const pem = process.env.VULT_PRIVATE_KEY_PEM
-
-  if (pem?.trim()) {
-    return pem.replace(/\\n/g, '\n')
+  if (
+    !privateKeyPem.includes('PRIVATE KEY') ||
+    privateKeyPem.includes('PUBLIC KEY')
+  ) {
+    throw new VultConfigurationError(
+      'INVALID_PRIVATE_KEY_PEM',
+      'The configured Vult signing key is not a private PEM key.',
+    )
   }
 
-  throw new Error(
-    'Missing VULT_PRIVATE_KEY_BASE64 or VULT_PRIVATE_KEY_PEM.',
-  )
+  try {
+    const key = createPrivateKey(privateKeyPem)
+
+    if (
+      key.asymmetricKeyType !== 'rsa' &&
+      key.asymmetricKeyType !== 'rsa-pss'
+    ) {
+      throw new Error(
+        `Expected RSA private key, received ${key.asymmetricKeyType ?? 'unknown'}.`,
+      )
+    }
+
+    const modulusLength = key.asymmetricKeyDetails?.modulusLength
+
+    if (modulusLength && modulusLength < 4096) {
+      throw new Error(
+        `Expected RSA-4096 key, received RSA-${modulusLength}.`,
+      )
+    }
+  } catch (error) {
+    throw new VultConfigurationError(
+      'INVALID_PRIVATE_KEY',
+      `The configured Vult private key cannot be used for RSA signing: ${
+        error instanceof Error ? error.message : 'unknown key error'
+      }`,
+    )
+  }
+
+  return privateKeyPem
 }
 
 function getBaseUrl() {
@@ -77,9 +152,6 @@ function getApiPaymentType(
 ): VultApiPaymentType {
   if (paymentMethod !== 'in-app') return paymentMethod
 
-  // The supplied OpenAPI schema calls this "in-app", while the supplied
-  // JavaScript signing example uses "vult". Keep it configurable so the
-  // merchant can match the environment actually enabled by Vult.
   const configured = process.env.VULT_IN_APP_TYPE?.trim()
 
   return configured === 'vult' ? 'vult' : 'in-app'
@@ -87,25 +159,39 @@ function getApiPaymentType(
 
 function stringifyAmount(amount: number) {
   if (!Number.isFinite(amount) || amount < 0) {
-    throw new Error('Invalid Vult payment amount.')
+    throw new VultConfigurationError(
+      'INVALID_AMOUNT',
+      'Invalid Vult payment amount.',
+    )
   }
 
   return amount.toFixed(2).replace(/\.00$/, '')
 }
 
 function signRequestBody(bodyText: string) {
-  const signer = createSign('RSA-SHA512')
-  signer.update(bodyText)
-  signer.end()
+  const privateKey = getPrivateKey()
 
-  return signer.sign(
-    {
-      key: getPrivateKey(),
-      padding: constants.RSA_PKCS1_PSS_PADDING,
-      saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
-    },
-    'base64',
-  )
+  try {
+    const signer = createSign('RSA-SHA512')
+    signer.update(bodyText)
+    signer.end()
+
+    return signer.sign(
+      {
+        key: privateKey,
+        padding: constants.RSA_PKCS1_PSS_PADDING,
+        saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+      },
+      'base64',
+    )
+  } catch (error) {
+    throw new VultConfigurationError(
+      'SIGNING_FAILED',
+      `Unable to sign the Vult payment request: ${
+        error instanceof Error ? error.message : 'unknown signing error'
+      }`,
+    )
+  }
 }
 
 function errorCode(body: any): string | null {
@@ -122,6 +208,32 @@ export function publicVultErrorMessage(
   error: unknown,
   paymentMethod?: VultPaymentMethod,
 ) {
+  if (error instanceof VultConfigurationError) {
+    if (error.code === 'MISSING_VULT_MERCHANT_ID') {
+      return 'Vult Merchant ID is not configured on the server.'
+    }
+
+    if (
+      error.code === 'MISSING_PRIVATE_KEY' ||
+      error.code === 'INVALID_PRIVATE_KEY_BASE64' ||
+      error.code === 'INVALID_PRIVATE_KEY_PEM' ||
+      error.code === 'INVALID_PRIVATE_KEY' ||
+      error.code === 'SIGNING_FAILED'
+    ) {
+      return 'The Vult RSA signing key is missing or invalid on the server.'
+    }
+
+    return 'The Vult payment configuration is incomplete.'
+  }
+
+  if (error instanceof VultTransportError) {
+    if (error.code === 'TIMEOUT') {
+      return 'The Vult payment service timed out. Please try again.'
+    }
+
+    return 'The server could not reach the Vult payment service. Please try again.'
+  }
+
   if (!(error instanceof VultApiError)) {
     return 'Vult payment could not be initialized. Please try again.'
   }
@@ -142,6 +254,10 @@ export function publicVultErrorMessage(
 
   if (code === 'INVALID_FIELD' && paymentMethod === 'in-app') {
     return 'Vult App payment is not currently available with this merchant configuration.'
+  }
+
+  if (error.status === 401 || error.status === 403) {
+    return 'Vult rejected the merchant authentication or request signature.'
   }
 
   return 'Vult could not create the payment request. Please try again or choose another payment method.'
@@ -171,23 +287,48 @@ export async function createVultPaymentLink({
     },
   }
 
-  // Sign and send exactly the same serialized bytes.
   const bodyText = JSON.stringify(requestBody)
   const signature = signRequestBody(bodyText)
 
-  const response = await fetch(
-    `${getBaseUrl()}/merchants/private/v1/payment-links`,
-    {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'X-Vult-Merchant-Signature': signature,
+  let response: Response
+
+  try {
+    response = await fetch(
+      `${getBaseUrl()}/merchants/private/v1/payment-links`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'X-Vult-Merchant-Signature': signature,
+        },
+        body: bodyText,
+        cache: 'no-store',
+        signal: AbortSignal.timeout(15000),
       },
-      body: bodyText,
-      cache: 'no-store',
-      signal: AbortSignal.timeout(15000),
-    },
-  )
+    )
+  } catch (error) {
+    const name =
+      error instanceof Error ? error.name : ''
+
+    if (
+      name === 'AbortError' ||
+      name === 'TimeoutError'
+    ) {
+      throw new VultTransportError(
+        'TIMEOUT',
+        'Vult payment-link request timed out.',
+        error,
+      )
+    }
+
+    throw new VultTransportError(
+      'NETWORK',
+      `Unable to reach the Vult payment-link endpoint: ${
+        error instanceof Error ? error.message : 'unknown network error'
+      }`,
+      error,
+    )
+  }
 
   const raw = await response.text()
   let body: any = null
