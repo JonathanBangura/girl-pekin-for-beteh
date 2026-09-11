@@ -2,6 +2,7 @@ import {
   constants,
   createPrivateKey,
   createSign,
+  type KeyObject,
 } from 'node:crypto'
 
 export type VultPaymentMethod = 'in-app' | 'card' | 'momo'
@@ -68,71 +69,173 @@ function required(name: string) {
   return value
 }
 
-function getPrivateKey() {
-  const encoded = process.env.VULT_PRIVATE_KEY_BASE64?.trim()
-  const pem = process.env.VULT_PRIVATE_KEY_PEM?.trim()
+function stripWrappingQuotes(value: string) {
+  const trimmed = value.trim()
 
-  let privateKeyPem = ''
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1).trim()
+  }
 
-  if (encoded) {
+  return trimmed
+}
+
+function normalizePem(value: string) {
+  return stripWrappingQuotes(value)
+    .replace(/\\n/g, '\n')
+    .replace(/\r\n/g, '\n')
+    .trim()
+}
+
+function validateRsa4096(key: KeyObject) {
+  if (
+    key.asymmetricKeyType !== 'rsa' &&
+    key.asymmetricKeyType !== 'rsa-pss'
+  ) {
+    throw new VultConfigurationError(
+      'INVALID_PRIVATE_KEY_TYPE',
+      `Expected RSA private key, received ${key.asymmetricKeyType ?? 'unknown'}.`,
+    )
+  }
+
+  const modulusLength = key.asymmetricKeyDetails?.modulusLength
+
+  if (modulusLength && modulusLength < 4096) {
+    throw new VultConfigurationError(
+      'PRIVATE_KEY_TOO_SMALL',
+      `Vult requires RSA-4096. Configured key is RSA-${modulusLength}.`,
+    )
+  }
+
+  return key
+}
+
+function parsePemPrivateKey(pem: string) {
+  if (pem.includes('BEGIN PUBLIC KEY')) {
+    throw new VultConfigurationError(
+      'PUBLIC_KEY_CONFIGURED',
+      'A public key was configured where the Vult private signing key is required.',
+    )
+  }
+
+  if (!pem.includes('PRIVATE KEY')) {
+    throw new VultConfigurationError(
+      'INVALID_PRIVATE_KEY_PEM',
+      'Configured value does not contain a PEM private key.',
+    )
+  }
+
+  try {
+    return validateRsa4096(createPrivateKey(pem))
+  } catch (error) {
+    if (error instanceof VultConfigurationError) throw error
+
+    throw new VultConfigurationError(
+      'INVALID_PRIVATE_KEY',
+      `Unable to parse the configured PEM private key: ${
+        error instanceof Error ? error.message : 'unknown key error'
+      }`,
+    )
+  }
+}
+
+function parseDerPrivateKey(buffer: Buffer) {
+  const attempts: Array<'pkcs8' | 'pkcs1'> = ['pkcs8', 'pkcs1']
+
+  for (const type of attempts) {
     try {
-      privateKeyPem = Buffer.from(encoded, 'base64').toString('utf8')
-    } catch (error) {
-      throw new VultConfigurationError(
-        'INVALID_PRIVATE_KEY_BASE64',
-        `VULT_PRIVATE_KEY_BASE64 could not be decoded: ${
-          error instanceof Error ? error.message : 'unknown decode error'
-        }`,
-      )
+      const key = createPrivateKey({
+        key: buffer,
+        format: 'der',
+        type,
+      })
+
+      return validateRsa4096(key)
+    } catch {
+      // Try next DER private-key encoding.
     }
-  } else if (pem) {
-    privateKeyPem = pem.replace(/\\n/g, '\n')
-  } else {
+  }
+
+  throw new VultConfigurationError(
+    'INVALID_PRIVATE_KEY_DER',
+    'The Base64 value decoded successfully but is not a supported PKCS#8/PKCS#1 RSA private key.',
+  )
+}
+
+function getPrivateKeyObject() {
+  const rawPem = process.env.VULT_PRIVATE_KEY_PEM?.trim()
+  const rawBase64 = process.env.VULT_PRIVATE_KEY_BASE64?.trim()
+
+  if (rawPem) {
+    return parsePemPrivateKey(normalizePem(rawPem))
+  }
+
+  if (!rawBase64) {
     throw new VultConfigurationError(
       'MISSING_PRIVATE_KEY',
       'Missing VULT_PRIVATE_KEY_BASE64 or VULT_PRIVATE_KEY_PEM.',
     )
   }
 
-  if (
-    !privateKeyPem.includes('PRIVATE KEY') ||
-    privateKeyPem.includes('PUBLIC KEY')
-  ) {
+  const configured = stripWrappingQuotes(rawBase64)
+
+  // Be forgiving if a raw PEM was accidentally pasted into the BASE64 field.
+  if (configured.includes('PRIVATE KEY')) {
+    return parsePemPrivateKey(normalizePem(configured))
+  }
+
+  const compact = configured.replace(/\s+/g, '')
+
+  if (!/^[A-Za-z0-9+/=_-]+$/.test(compact)) {
     throw new VultConfigurationError(
-      'INVALID_PRIVATE_KEY_PEM',
-      'The configured Vult signing key is not a private PEM key.',
+      'INVALID_PRIVATE_KEY_BASE64',
+      'VULT_PRIVATE_KEY_BASE64 contains characters that are not valid Base64.',
     )
   }
 
+  let decoded: Buffer
+
   try {
-    const key = createPrivateKey(privateKeyPem)
+    // Node accepts standard Base64. Convert URL-safe Base64 too, just in case.
+    const normalized = compact
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
 
-    if (
-      key.asymmetricKeyType !== 'rsa' &&
-      key.asymmetricKeyType !== 'rsa-pss'
-    ) {
-      throw new Error(
-        `Expected RSA private key, received ${key.asymmetricKeyType ?? 'unknown'}.`,
-      )
-    }
-
-    const modulusLength = key.asymmetricKeyDetails?.modulusLength
-
-    if (modulusLength && modulusLength < 4096) {
-      throw new Error(
-        `Expected RSA-4096 key, received RSA-${modulusLength}.`,
-      )
-    }
+    decoded = Buffer.from(normalized, 'base64')
   } catch (error) {
     throw new VultConfigurationError(
-      'INVALID_PRIVATE_KEY',
-      `The configured Vult private key cannot be used for RSA signing: ${
-        error instanceof Error ? error.message : 'unknown key error'
+      'INVALID_PRIVATE_KEY_BASE64',
+      `VULT_PRIVATE_KEY_BASE64 could not be decoded: ${
+        error instanceof Error ? error.message : 'unknown decode error'
       }`,
     )
   }
 
-  return privateKeyPem
+  if (!decoded.length) {
+    throw new VultConfigurationError(
+      'INVALID_PRIVATE_KEY_BASE64',
+      'VULT_PRIVATE_KEY_BASE64 decoded to an empty value.',
+    )
+  }
+
+  const decodedText = decoded.toString('utf8').trim()
+
+  // Preferred Vercel format: Base64 of the complete private_key.pem file.
+  if (decodedText.includes('PRIVATE KEY')) {
+    return parsePemPrivateKey(normalizePem(decodedText))
+  }
+
+  if (decodedText.includes('PUBLIC KEY')) {
+    throw new VultConfigurationError(
+      'PUBLIC_KEY_CONFIGURED',
+      'VULT_PRIVATE_KEY_BASE64 contains a public key. The server requires the matching private key.',
+    )
+  }
+
+  // Also support Base64 of raw PKCS#8 / PKCS#1 DER bytes.
+  return parseDerPrivateKey(decoded)
 }
 
 function getBaseUrl() {
@@ -169,7 +272,7 @@ function stringifyAmount(amount: number) {
 }
 
 function signRequestBody(bodyText: string) {
-  const privateKey = getPrivateKey()
+  const privateKey = getPrivateKeyObject()
 
   try {
     const signer = createSign('RSA-SHA512')
@@ -185,6 +288,8 @@ function signRequestBody(bodyText: string) {
       'base64',
     )
   } catch (error) {
+    if (error instanceof VultConfigurationError) throw error
+
     throw new VultConfigurationError(
       'SIGNING_FAILED',
       `Unable to sign the Vult payment request: ${
@@ -213,14 +318,27 @@ export function publicVultErrorMessage(
       return 'Vult Merchant ID is not configured on the server.'
     }
 
+    if (error.code === 'MISSING_PRIVATE_KEY') {
+      return 'The Vult private signing key is not configured on the server.'
+    }
+
+    if (error.code === 'PUBLIC_KEY_CONFIGURED') {
+      return 'The Vult public key was configured on the server, but payment signing requires the matching private key.'
+    }
+
+    if (error.code === 'PRIVATE_KEY_TOO_SMALL') {
+      return 'The configured Vult signing key is not RSA-4096.'
+    }
+
     if (
-      error.code === 'MISSING_PRIVATE_KEY' ||
       error.code === 'INVALID_PRIVATE_KEY_BASE64' ||
       error.code === 'INVALID_PRIVATE_KEY_PEM' ||
+      error.code === 'INVALID_PRIVATE_KEY_DER' ||
+      error.code === 'INVALID_PRIVATE_KEY_TYPE' ||
       error.code === 'INVALID_PRIVATE_KEY' ||
       error.code === 'SIGNING_FAILED'
     ) {
-      return 'The Vult RSA signing key is missing or invalid on the server.'
+      return 'The Vult private signing key is present but its format is invalid.'
     }
 
     return 'The Vult payment configuration is incomplete.'
@@ -307,8 +425,7 @@ export async function createVultPaymentLink({
       },
     )
   } catch (error) {
-    const name =
-      error instanceof Error ? error.name : ''
+    const name = error instanceof Error ? error.name : ''
 
     if (
       name === 'AbortError' ||
