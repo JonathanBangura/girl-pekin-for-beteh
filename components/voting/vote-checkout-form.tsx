@@ -24,6 +24,9 @@ export function VoteCheckoutForm({
     setMessage('')
 
     const formData = new FormData(event.currentTarget)
+    const paymentMethod = String(
+      formData.get('payment_method') ?? 'in-app',
+    )
 
     const response = await fetch('/api/voting/orders', {
       method: 'POST',
@@ -31,28 +34,23 @@ export function VoteCheckoutForm({
       body: JSON.stringify({
         nominee_code: nomineeCode,
         quantity,
-        buyer_name: String(
-          formData.get('buyer_name') ?? '',
-        ),
-        buyer_email: String(
-          formData.get('buyer_email') ?? '',
-        ),
-        buyer_phone: String(
-          formData.get('buyer_phone') ?? '',
-        ),
-        payment_method: String(
-          formData.get('payment_method') ?? 'in-app',
-        ),
+        buyer_name: String(formData.get('buyer_name') ?? ''),
+        buyer_email: String(formData.get('buyer_email') ?? ''),
+        buyer_phone: String(formData.get('buyer_phone') ?? ''),
+        payment_method: paymentMethod,
       }),
     })
 
     const body = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-      setMessage(
-        body.error || 'Unable to create vote payment.',
-      )
+      setMessage(body.error || 'Unable to create vote payment.')
       setLoading(false)
+      return
+    }
+
+    if (paymentMethod === 'card' && body.payment_url) {
+      window.location.assign(body.payment_url)
       return
     }
 
@@ -62,7 +60,7 @@ export function VoteCheckoutForm({
     }
 
     setMessage(
-      'Payment request created. Open the order status to continue.',
+      'Payment request was created, but no payment instruction was returned.',
     )
     setLoading(false)
   }
@@ -71,21 +69,13 @@ export function VoteCheckoutForm({
     <section className="panel checkout-form-card">
       <h2>Contact information</h2>
       <p>
-        Used to identify and support the vote order for{' '}
-        {nomineeName}.
+        Used to identify and support the vote order for {nomineeName}.
       </p>
 
-      <form
-        onSubmit={submit}
-        className="live-vote-contact-form"
-      >
+      <form onSubmit={submit} className="live-vote-contact-form">
         <label>
           Full name
-          <input
-            name="buyer_name"
-            autoComplete="name"
-            required
-          />
+          <input name="buyer_name" autoComplete="name" required />
         </label>
 
         <label>
@@ -114,10 +104,7 @@ export function VoteCheckoutForm({
         <VultPaymentMethodField disabled={loading} />
 
         {message && (
-          <div
-            className="live-form-message error"
-            role="alert"
-          >
+          <div className="live-form-message error" role="alert">
             {message}
           </div>
         )}
@@ -127,14 +114,12 @@ export function VoteCheckoutForm({
           type="submit"
           disabled={loading}
         >
-          {loading
-            ? 'Connecting to Vult…'
-            : 'Continue to Vult payment'}
+          {loading ? 'Connecting to Vult…' : 'Continue to payment'}
         </button>
 
         <p className="secure-note">
-          Votes are added only after Vult sends a verified
-          completed-payment webhook.
+          Votes are added only after Vult sends a verified completed-payment
+          webhook.
         </p>
       </form>
     </section>

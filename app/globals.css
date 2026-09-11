@@ -9864,3 +9864,279 @@ textarea:focus-visible {
     max-height: 14px;
   }
 }
+
+/* ==========================================================
+   VULT PAYMENT EXPERIENCE — QR / MOMO / DIRECT CARD
+   Mobile-first.
+   ========================================================== */
+
+.vult-pay-page {
+  min-height: 100vh;
+  padding: 24px 16px 50px;
+  background: #f5f7f8;
+}
+
+.vult-pay-shell {
+  width: min(100%, 700px);
+  margin: 0 auto;
+  padding: 38px;
+  border-radius: 34px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(16, 33, 29, .10);
+  text-align: center;
+}
+
+.vult-pay-brand-card {
+  width: 214px;
+  min-height: 126px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 28px;
+  padding: 20px;
+  border: 1px solid #dce8e5;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 5px 12px rgba(16, 33, 29, .08);
+}
+
+.vult-pay-brand-card img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.vult-pay-brand-card-momo {
+  width: 236px;
+}
+
+.vult-pay-kicker {
+  display: block;
+  margin-bottom: 13px;
+  color: #17b6c4;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.vult-pay-shell h1 {
+  margin: 0;
+  color: #3f1f12;
+  font-size: clamp(2rem, 7vw, 3.1rem);
+  line-height: 1.05;
+}
+
+.vult-pay-subtitle {
+  max-width: 540px;
+  margin: 18px auto 28px;
+  color: #735e54;
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.vult-qr-card {
+  width: min(100%, 520px);
+  margin: 0 auto 26px;
+  padding: 22px;
+  border: 1px solid #edf0ee;
+  border-radius: 26px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(16, 33, 29, .06);
+}
+
+.vult-qr-card img {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  margin: 0 auto;
+}
+
+.vult-pay-actions {
+  display: grid;
+  gap: 14px;
+  margin: 0 auto;
+}
+
+.vult-action-primary,
+.vult-action-dial {
+  min-height: 58px;
+  width: 100%;
+  display: inline-flex;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 16px !important;
+  font-size: 16px !important;
+}
+
+.vult-action-primary {
+  background: #18b4c2 !important;
+  border-color: #18b4c2 !important;
+  color: #fff !important;
+}
+
+.vult-action-dial {
+  background: #ff8b2b !important;
+  border-color: #ff8b2b !important;
+  color: #2f1b10 !important;
+}
+
+.vult-ussd-code {
+  margin: 28px auto 24px;
+  padding: 28px 18px;
+  border-radius: 20px;
+  background: #f8fbfa;
+  color: #4a2819;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.vult-waiting-notice {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 8px;
+  margin: 26px 0 20px;
+  padding: 18px;
+  border-radius: 17px;
+  background: #fff7e3;
+  color: #b84c05;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.vult-pay-secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.vult-pay-secondary-actions .button {
+  min-height: 54px;
+  border-radius: 16px;
+}
+
+.vult-pay-order-reference {
+  min-height: 54px;
+  display: grid;
+  align-content: center;
+  padding: 8px 14px;
+  border: 1px solid #d9e4df;
+  border-radius: 16px;
+  color: #63746d;
+  text-align: left;
+}
+
+.vult-pay-order-reference span {
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.vult-pay-order-reference strong {
+  margin-top: 2px;
+  color: #173a32;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.vult-powered-by {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin-top: 28px;
+  color: #7a6960;
+  font-size: 12px;
+}
+
+.vult-powered-by img {
+  width: 50px;
+  height: auto;
+}
+
+.vult-refresh-centered {
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.vult-pay-success-large {
+  margin: 28px 0;
+  text-align: left;
+}
+
+.vult-pay-summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid #dce6e2;
+  border-radius: 14px;
+  color: #66766f;
+}
+
+.vult-pay-summary strong {
+  color: #173a32;
+}
+
+@media (max-width: 600px) {
+  .vult-pay-page {
+    padding: 18px 12px calc(36px + env(safe-area-inset-bottom));
+  }
+
+  .vult-pay-shell {
+    padding: 28px 20px;
+    border-radius: 28px;
+  }
+
+  .vult-pay-brand-card {
+    width: 186px;
+    min-height: 108px;
+    margin-bottom: 24px;
+  }
+
+  .vult-pay-brand-card-momo {
+    width: 205px;
+  }
+
+  .vult-pay-subtitle {
+    font-size: 15px;
+  }
+
+  .vult-qr-card {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .vult-pay-secondary-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .vult-pay-order-reference {
+    text-align: center;
+  }
+}
+
+@media (max-width: 390px) {
+  .vult-pay-shell {
+    padding: 24px 16px;
+  }
+
+  .vult-pay-brand-card {
+    width: 164px;
+    min-height: 98px;
+  }
+
+  .vult-pay-brand-card-momo {
+    width: 185px;
+  }
+
+  .vult-waiting-notice {
+    font-size: 13px;
+  }
+}

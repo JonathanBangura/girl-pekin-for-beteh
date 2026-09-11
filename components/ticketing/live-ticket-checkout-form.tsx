@@ -25,6 +25,9 @@ export function LiveTicketCheckoutForm({
     setMessage('')
 
     const formData = new FormData(event.currentTarget)
+    const paymentMethod = String(
+      formData.get('payment_method') ?? 'in-app',
+    )
 
     const response = await fetch('/api/ticketing/orders', {
       method: 'POST',
@@ -34,38 +37,35 @@ export function LiveTicketCheckoutForm({
         ticket_type_id: ticketTypeId,
         quantity,
         donation_per_ticket: donationPerTicket,
-        purchaser_name: String(
-          formData.get('purchaser_name') ?? '',
-        ),
-        purchaser_email: String(
-          formData.get('purchaser_email') ?? '',
-        ),
-        purchaser_phone: String(
-          formData.get('purchaser_phone') ?? '',
-        ),
-        payment_method: String(
-          formData.get('payment_method') ?? 'in-app',
-        ),
+        purchaser_name: String(formData.get('purchaser_name') ?? ''),
+        purchaser_email: String(formData.get('purchaser_email') ?? ''),
+        purchaser_phone: String(formData.get('purchaser_phone') ?? ''),
+        payment_method: paymentMethod,
       }),
     })
 
     const body = await response.json().catch(() => ({}))
 
     if (!response.ok) {
-      setMessage(
-        body.error || 'Unable to create ticket payment.',
-      )
+      setMessage(body.error || 'Unable to create ticket payment.')
       setLoading(false)
       return
     }
 
+    // Card should go directly to the Vult-provided card checkout page.
+    if (paymentMethod === 'card' && body.payment_url) {
+      window.location.assign(body.payment_url)
+      return
+    }
+
+    // Vult App and Mobile Money use our payment instruction/status page.
     if (body.status_url) {
       window.location.assign(body.status_url)
       return
     }
 
     setMessage(
-      'Payment request created. Open the order status to continue.',
+      'Payment request was created, but no payment instruction was returned.',
     )
     setLoading(false)
   }
@@ -74,21 +74,13 @@ export function LiveTicketCheckoutForm({
     <section className="panel checkout-form-card mobile-checkout-card">
       <h2>Guest information</h2>
       <p>
-        Enter the primary purchaser details for the{' '}
-        {ticketTypeName} order.
+        Enter the primary purchaser details for the {ticketTypeName} order.
       </p>
 
-      <form
-        onSubmit={submit}
-        className="mobile-ticket-checkout-form"
-      >
+      <form onSubmit={submit} className="mobile-ticket-checkout-form">
         <label>
           Full name
-          <input
-            name="purchaser_name"
-            autoComplete="name"
-            required
-          />
+          <input name="purchaser_name" autoComplete="name" required />
         </label>
 
         <label>
@@ -117,10 +109,7 @@ export function LiveTicketCheckoutForm({
         <VultPaymentMethodField disabled={loading} />
 
         {message && (
-          <div
-            className="live-form-message error"
-            role="alert"
-          >
+          <div className="live-form-message error" role="alert">
             {message}
           </div>
         )}
@@ -130,14 +119,11 @@ export function LiveTicketCheckoutForm({
           type="submit"
           disabled={loading}
         >
-          {loading
-            ? 'Connecting to Vult…'
-            : 'Continue to Vult payment'}
+          {loading ? 'Connecting to Vult…' : 'Continue to payment'}
         </button>
 
         <p className="secure-note">
-          Payment is confirmed by Vult before the ticket order is
-          marked paid.
+          Payment is confirmed by Vult before the ticket order is marked paid.
         </p>
       </form>
     </section>

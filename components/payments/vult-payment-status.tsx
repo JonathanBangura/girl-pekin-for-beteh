@@ -1,31 +1,33 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import QRCode from 'qrcode'
 import {
   CheckCircle2,
-  ExternalLink,
   RefreshCw,
 } from 'lucide-react'
-import {
-  PublicFooter,
-  PublicHeader,
-  Pill,
-} from '@/components/public/public'
 import {
   getPublicVultPaymentStatus,
   type PublicVultOrderKind,
 } from '@/lib/vult/public'
 import { PaymentStatusRefresh } from './payment-status-refresh'
+import {
+  CopyPaymentCode,
+  DialPaymentCode,
+  OpenVultPayment,
+} from './vult-payment-actions'
 
 function money(value: unknown, currency: string) {
   const amount = Number(value ?? 0)
-
   return `${currency === 'SLE' ? 'NLe' : currency} ${amount.toLocaleString()}`
 }
 
-function methodLabel(value?: string | null) {
-  if (value === 'card') return 'Card'
-  if (value === 'momo') return 'Mobile Money'
-  return 'Vult App'
+function backHref(
+  kind: PublicVultOrderKind,
+  referenceCode?: string | null,
+) {
+  if (kind === 'vote') return '/nominees'
+  return referenceCode ? `/events/${referenceCode}` : '/events'
 }
 
 export async function VultPaymentStatusPage({
@@ -35,10 +37,7 @@ export async function VultPaymentStatusPage({
   kind: PublicVultOrderKind
   token: string
 }) {
-  const status = await getPublicVultPaymentStatus(
-    kind,
-    token,
-  )
+  const status = await getPublicVultPaymentStatus(kind, token)
 
   if (!status) notFound()
 
@@ -47,62 +46,57 @@ export async function VultPaymentStatusPage({
     status.payment_status === 'processing' ||
     status.payment_status === 'pending'
 
+  const method = status.payment_method || 'in-app'
+
+  // Card users should never have to stop at an intermediate merchant page.
+  // Send them directly to the card checkout URL Vult returned.
+  if (
+    !completed &&
+    method === 'card' &&
+    status.payment_link
+  ) {
+    redirect(status.payment_link)
+  }
+
+  let qrDataUrl: string | null = null
+
+  if (
+    !completed &&
+    method === 'in-app' &&
+    status.payment_link
+  ) {
+    qrDataUrl = await QRCode.toDataURL(status.payment_link, {
+      errorCorrectionLevel: 'M',
+      margin: 1,
+      width: 360,
+    })
+  }
+
+  const returnHref = backHref(kind, status.reference_code)
+
   return (
-    <>
+    <main className="vult-pay-page">
       <PaymentStatusRefresh active={!completed} />
 
-      <PublicHeader />
-
-      <main className="section professional-form-page mobile-transaction-page">
-        <section className="panel vult-payment-status-card">
-          <Pill tone={completed ? 'teal' : 'gold'}>
-            {completed ? 'Payment confirmed' : 'Vult Payment'}
-          </Pill>
-
-          <h1>{status.order_number}</h1>
-          <p>
-            {status.reference_name}
-            {status.reference_code
-              ? ` · ${status.reference_code}`
-              : ''}
-          </p>
-
-          <div className="live-order-status-grid">
-            <div>
-              <span>Order type</span>
-              <strong>{kind}</strong>
+      <section className="vult-pay-shell">
+        {completed ? (
+          <>
+            <div className="vult-pay-brand-card">
+              <Image
+                src="/LOGOvult-horizontal-DARK-BLUE.svg"
+                alt="Vult"
+                width={150}
+                height={56}
+              />
             </div>
 
-            <div>
-              <span>Payment method</span>
-              <strong>
-                {methodLabel(status.payment_method)}
-              </strong>
-            </div>
+            <span className="vult-pay-kicker">Payment confirmed</span>
+            <h1>Payment Received</h1>
 
-            <div>
-              <span>Total</span>
-              <strong>
-                {money(
-                  status.total_amount,
-                  status.currency,
-                )}
-              </strong>
-            </div>
-
-            <div>
-              <span>Payment status</span>
-              <strong>{status.payment_status}</strong>
-            </div>
-          </div>
-
-          {completed ? (
-            <div className="vult-payment-success">
-              <CheckCircle2 size={22} />
-
+            <div className="vult-payment-success vult-pay-success-large">
+              <CheckCircle2 size={25} />
               <div>
-                <strong>Payment received.</strong>
-
+                <strong>{status.order_number}</strong>
                 <p>
                   {kind === 'vote'
                     ? 'Your successful payment has been allocated to the nominee vote ledger.'
@@ -112,67 +106,170 @@ export async function VultPaymentStatusPage({
                 </p>
               </div>
             </div>
-          ) : (
-            <>
-              {status.last_attempt_status === 'failed' && (
-                <div className="live-vult-note">
-                  <strong>
-                    The last payment attempt did not complete.
-                  </strong>
-                  <p>
-                    The order remains open so you can retry the
-                    payment.
-                  </p>
+
+            <div className="vult-pay-summary">
+              <span>Total paid</span>
+              <strong>{money(status.total_amount, status.currency)}</strong>
+            </div>
+
+            <Link className="button vult-action-primary" href={returnHref}>
+              {kind === 'vote' ? 'Back to Nominees' : 'Back to Event'}
+            </Link>
+          </>
+        ) : method === 'momo' ? (
+          <>
+            <div className="vult-pay-brand-card vult-pay-brand-card-momo">
+              <Image
+                src="/momo.png"
+                alt="Orange Money and Afrimoney"
+                width={180}
+                height={70}
+              />
+            </div>
+
+            <span className="vult-pay-kicker">Secure payment</span>
+            <h1>Mobile Money Payment</h1>
+            <p className="vult-pay-subtitle">
+              Dial the code below to complete your Orange Money or Afrimoney payment.
+            </p>
+
+            {status.payment_code ? (
+              <>
+                <div className="vult-ussd-code">
+                  {status.payment_code}
                 </div>
-              )}
 
-              {status.payment_code && (
-                <div className="vult-payment-code">
-                  <span>Mobile-money payment code</span>
-                  <strong>{status.payment_code}</strong>
-                  <small>
-                    Dial or use this code to complete the payment,
-                    then keep this page open while the status
-                    refreshes.
-                  </small>
+                <div className="vult-pay-actions">
+                  <CopyPaymentCode code={status.payment_code} />
+                  <DialPaymentCode code={status.payment_code} />
                 </div>
-              )}
+              </>
+            ) : (
+              <div className="live-vult-note">
+                <strong>Waiting for a payment code</strong>
+                <p>
+                  The page will refresh automatically while Vult prepares the
+                  mobile-money instruction.
+                </p>
+              </div>
+            )}
 
-              {status.payment_link && (
-                <a
-                  className="button checkout-button"
-                  href={status.payment_link}
-                >
-                  Continue to Vult
-                  <ExternalLink size={15} />
-                </a>
-              )}
+            <WaitingNotice failed={status.last_attempt_status === 'failed'} />
 
-              {waiting && (
-                <div className="vult-refresh-note">
-                  <RefreshCw size={15} />
-                  Payment status refreshes automatically.
-                </div>
-              )}
-            </>
-          )}
+            <div className="vult-pay-secondary-actions">
+              <button
+                type="button"
+                className="button secondary"
+                onClick={undefined}
+                disabled
+              >
+                Order {status.order_number}
+              </button>
 
-          <Link
-            className="button secondary"
-            href={
-              kind === 'vote'
-                ? '/nominees'
-                : `/events/${status.reference_code}`
-            }
-          >
-            {kind === 'vote'
-              ? 'Return to nominees'
-              : 'Return to event'}
-          </Link>
-        </section>
-      </main>
+              <Link className="button secondary" href={returnHref}>
+                Back to {kind === 'vote' ? 'Nominees' : 'Event'}
+              </Link>
+            </div>
 
-      <PublicFooter />
-    </>
+            <PoweredByVult />
+          </>
+        ) : (
+          <>
+            <div className="vult-pay-brand-card">
+              <Image
+                src="/LOGOvult-horizontal-DARK-BLUE.svg"
+                alt="Vult"
+                width={160}
+                height={58}
+                priority
+              />
+            </div>
+
+            <span className="vult-pay-kicker">Secure payment</span>
+            <h1>Vult App Payment</h1>
+            <p className="vult-pay-subtitle">
+              Scan the QR code or open the Vult payment link to complete payment.
+            </p>
+
+            {qrDataUrl ? (
+              <div className="vult-qr-card">
+                {/* qrcode creates an in-memory data URL from the Vult payment link. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={qrDataUrl}
+                  alt="Vult payment QR code"
+                  width={360}
+                  height={360}
+                />
+              </div>
+            ) : (
+              <div className="live-vult-note">
+                <strong>Payment link is being prepared</strong>
+                <p>
+                  Keep this page open. The payment status refreshes automatically.
+                </p>
+              </div>
+            )}
+
+            {status.payment_link && (
+              <OpenVultPayment href={status.payment_link} />
+            )}
+
+            <WaitingNotice failed={status.last_attempt_status === 'failed'} />
+
+            <div className="vult-pay-secondary-actions">
+              <div className="vult-pay-order-reference">
+                <span>Order</span>
+                <strong>{status.order_number}</strong>
+              </div>
+
+              <Link className="button secondary" href={returnHref}>
+                Back to {kind === 'vote' ? 'Nominees' : 'Event'}
+              </Link>
+            </div>
+
+            <PoweredByVult />
+          </>
+        )}
+
+        {waiting && !completed && (
+          <div className="vult-refresh-note vult-refresh-centered">
+            <RefreshCw size={15} />
+            Payment status refreshes automatically.
+          </div>
+        )}
+      </section>
+    </main>
+  )
+}
+
+function WaitingNotice({
+  failed,
+}: {
+  failed: boolean
+}) {
+  return (
+    <div className="vult-waiting-notice">
+      <span aria-hidden="true">⌛</span>
+      <strong>
+        {failed
+          ? 'The last payment attempt did not complete. You can try again.'
+          : 'Waiting for payment confirmation. This can sometimes take a little longer.'}
+      </strong>
+    </div>
+  )
+}
+
+function PoweredByVult() {
+  return (
+    <div className="vult-powered-by">
+      <span>Powered by</span>
+      <Image
+        src="/LOGOvult-horizontal-DARK-BLUE.svg"
+        alt="Vult"
+        width={62}
+        height={24}
+      />
+    </div>
   )
 }
