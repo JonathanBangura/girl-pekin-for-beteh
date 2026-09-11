@@ -10,6 +10,74 @@ function clean(value: unknown, max = 200) {
   return String(value ?? '').trim().slice(0, max)
 }
 
+function reservationErrorMessage(error: {
+  code?: string
+  message?: string
+} | null) {
+  const code = error?.code ?? ''
+  const message = error?.message ?? ''
+
+  if (
+    code === 'PGRST202' ||
+    (message.includes('create_ticket_order_reservation') &&
+      message.includes('Could not find'))
+  ) {
+    return 'The ticketing backend function is not available. Apply the Phase 6A ticketing migration before creating orders.'
+  }
+
+  if (
+    message.includes('gen_random_bytes') ||
+    message.includes('digest')
+  ) {
+    return 'The ticketing security functions are not available to the reservation workflow. Apply migration 0008_ticketing_rpc_hotfix.sql.'
+  }
+
+  if (message.includes('Event is not available')) {
+    return 'This event is not currently available for paid ticket sales.'
+  }
+
+  if (message.includes('Ticket type is not available')) {
+    return 'This ticket type is not currently available.'
+  }
+
+  if (
+    message.includes('Ticket sales have not started') ||
+    message.includes('Ticket sales have ended')
+  ) {
+    return 'Ticket sales are not currently open.'
+  }
+
+  if (message.includes('capacity')) {
+    return 'There are not enough tickets remaining for this selection.'
+  }
+
+  if (message.includes('Donation')) {
+    return 'Please enter a valid donation per ticket.'
+  }
+
+  if (message.includes('Maximum quantity')) {
+    return message
+  }
+
+  if (message.includes('Ticket quantity')) {
+    return 'Please enter a valid ticket quantity.'
+  }
+
+  if (message.includes('Purchaser name')) {
+    return 'Please enter the purchaser name.'
+  }
+
+  if (message.includes('Email or phone')) {
+    return 'Please provide an email address or phone number.'
+  }
+
+  if (message.includes('Free registration')) {
+    return 'This is a free-registration ticket and does not use the paid checkout.'
+  }
+
+  return 'Unable to create the ticket order. Please review your selection.'
+}
+
 export async function POST(request: NextRequest) {
   let body: Record<string, unknown>
 
@@ -83,23 +151,18 @@ export async function POST(request: NextRequest) {
   )
 
   if (error || !data?.length) {
-    console.error('create ticket order reservation', error)
-
-    const message =
-      error?.message || 'Unable to create ticket order.'
+    console.error('create ticket order reservation', {
+      code: error?.code,
+      message: error?.message,
+      details: error?.details,
+      hint: error?.hint,
+      eventSlug,
+      ticketTypeId,
+      quantity,
+    })
 
     return NextResponse.json(
-      {
-        error: message.includes('capacity')
-          ? 'There are not enough tickets remaining for this selection.'
-          : message.includes('sales')
-            ? 'Ticket sales are not currently open.'
-            : message.includes('Donation')
-              ? 'Please enter a valid donation per ticket.'
-              : message.includes('Maximum quantity')
-                ? message
-                : 'Unable to create the ticket order. Please review your selection.',
-      },
+      { error: reservationErrorMessage(error) },
       { status: 409 },
     )
   }
