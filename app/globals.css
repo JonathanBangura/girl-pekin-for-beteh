@@ -10400,3 +10400,300 @@ textarea:focus-visible {
     display: grid;
   }
 }
+
+/* ==========================================================
+   PHASE 6C — REAL SCANNER + CHECK-IN
+   Mobile-first.
+   ========================================================== */
+
+.live-scanner .scanner-body {
+  width: min(100%, 820px);
+}
+
+.live-scanner-heading {
+  margin-bottom: 18px;
+}
+
+.scanner-event-control {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.scanner-event-control label {
+  display: grid;
+  gap: 6px;
+  color: #5f7069;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.scanner-event-control select,
+.scanner-event-control input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #dbe5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #173a32;
+}
+
+.scanner-event-meta {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 2px;
+  padding: 13px 14px;
+  border: 1px solid #e0e8e4;
+  border-radius: 11px;
+  background: #f8faf9;
+}
+
+.scanner-event-meta strong {
+  color: #173a32;
+}
+
+.scanner-event-meta span,
+.scanner-event-meta small {
+  color: #718079;
+  font-size: 12px;
+}
+
+.scanner-live-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.scanner-live-stats article {
+  padding: 14px;
+  border: 1px solid #e0e8e4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.scanner-live-stats span {
+  display: block;
+  margin-bottom: 3px;
+  color: #718079;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.scanner-live-stats strong {
+  color: #173a32;
+  font-size: 24px;
+}
+
+.live-scanner-workspace {
+  padding: 16px;
+}
+
+.live-camera-frame {
+  min-height: 330px;
+  overflow: hidden;
+  background: #0e1715;
+  position: relative;
+}
+
+.live-camera-frame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.live-camera-frame video.active {
+  opacity: 1;
+}
+
+.scanner-camera-placeholder {
+  min-height: 300px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 9px;
+  color: #d9e7e2;
+  text-align: center;
+}
+
+.scanner-camera-placeholder small {
+  color: #93a49e;
+}
+
+.scanner-camera-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.scanner-camera-actions .button {
+  min-height: 48px;
+}
+
+.live-manual-checkin {
+  align-items: stretch;
+}
+
+.live-manual-checkin .button {
+  min-height: 48px;
+}
+
+.live-scan-result {
+  margin-top: 16px;
+}
+
+.scan-result-message {
+  margin: 8px 0 16px;
+  color: #63746d;
+  text-align: center;
+}
+
+.scan-result-time {
+  display: block;
+  margin: 12px 0;
+  color: #718079;
+  text-align: center;
+}
+
+.live-recent-scans {
+  margin-top: 16px;
+}
+
+.scanner-refresh-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: #0d5f50;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.scanner-admin-link {
+  display: inline-flex;
+  margin-top: 12px;
+  color: #0d5f50;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.scanner-empty-recent {
+  padding: 18px 0;
+  color: #7b8984;
+  font-size: 12px;
+}
+
+.scanner-no-events {
+  margin-top: 50px;
+  padding: 34px 24px;
+  border: 1px solid #e0e8e4;
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+}
+
+.scanner-no-events svg {
+  color: #d19a24;
+}
+
+.scanner-no-events h1 {
+  margin: 12px 0 8px;
+  font-size: 28px;
+}
+
+.scanner-no-events p {
+  max-width: 520px;
+  margin: auto;
+  color: #718079;
+}
+
+.checkin-admin-event-filter {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid #e0e8e4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.checkin-admin-event-filter label {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  color: #63746d;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.checkin-admin-event-filter select {
+  min-height: 46px;
+  padding: 8px 10px;
+  border: 1px solid #dce5e1;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.checkin-admin-event-card {
+  margin-bottom: 14px;
+}
+
+.checkin-admin-event-card h2 {
+  margin: 5px 0;
+}
+
+.checkin-admin-event-card p {
+  color: #718079;
+}
+
+@media (max-width: 700px) {
+  .scanner-event-control,
+  .scanner-live-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .scanner-live-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .live-camera-frame {
+    min-height: 320px;
+  }
+
+  .checkin-admin-event-filter {
+    display: grid;
+  }
+
+  .checkin-admin-event-filter .button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .scanner-live-stats article {
+    padding: 11px;
+  }
+
+  .scanner-live-stats strong {
+    font-size: 20px;
+  }
+
+  .live-camera-frame {
+    min-height: 280px;
+  }
+
+  .scanner-camera-actions .button,
+  .live-manual-checkin .button,
+  .live-scan-result .button {
+    width: 100%;
+    min-height: 50px;
+  }
+}
