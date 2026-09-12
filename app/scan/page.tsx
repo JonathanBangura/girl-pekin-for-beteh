@@ -1,2 +1,7 @@
 import { Scanner } from '@/components/scanner/scanner'
-export default function ScanPage() { return <Scanner /> }
+import { getScannerBootstrapData } from '@/lib/checkin/data'
+
+export default async function ScanPage() {
+  const data = await getScannerBootstrapData()
+  return <Scanner {...data} />
+}

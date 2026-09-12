@@ -1,2 +1,10 @@
-import { AdminModule } from '@/components/portal/admin-module'
-export default function CheckinsPage(){return <AdminModule title="Check-ins" eyebrow="Events"/>}
+import { CheckinsLivePage } from '@/components/portal/checkins-live'
+
+export default async function CheckinsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ event_id?: string }>
+}) {
+  const params = await searchParams
+  return <CheckinsLivePage eventId={params.event_id} />
+}
