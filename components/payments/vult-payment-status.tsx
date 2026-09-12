@@ -2,10 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import QRCode from 'qrcode'
-import {
-  CheckCircle2,
-  RefreshCw,
-} from 'lucide-react'
+import { CheckCircle2, RefreshCw } from 'lucide-react'
 import {
   getPublicVultPaymentStatus,
   type PublicVultOrderKind,
@@ -38,33 +35,21 @@ export async function VultPaymentStatusPage({
   token: string
 }) {
   const status = await getPublicVultPaymentStatus(kind, token)
-
   if (!status) notFound()
 
   const completed = status.payment_status === 'succeeded'
   const waiting =
     status.payment_status === 'processing' ||
     status.payment_status === 'pending'
-
   const method = status.payment_method || 'in-app'
 
-  // Card users should never have to stop at an intermediate merchant page.
-  // Send them directly to the card checkout URL Vult returned.
-  if (
-    !completed &&
-    method === 'card' &&
-    status.payment_link
-  ) {
+  if (!completed && method === 'card' && status.payment_link) {
     redirect(status.payment_link)
   }
 
   let qrDataUrl: string | null = null
 
-  if (
-    !completed &&
-    method === 'in-app' &&
-    status.payment_link
-  ) {
+  if (!completed && method === 'in-app' && status.payment_link) {
     qrDataUrl = await QRCode.toDataURL(status.payment_link, {
       errorCorrectionLevel: 'M',
       margin: 1,
@@ -101,20 +86,43 @@ export async function VultPaymentStatusPage({
                   {kind === 'vote'
                     ? 'Your successful payment has been allocated to the nominee vote ledger.'
                     : Number(status.issued_tickets) > 0
-                      ? `${status.issued_tickets} ticket${Number(status.issued_tickets) === 1 ? '' : 's'} issued.`
-                      : 'Your ticket order is paid. Your individual QR tickets are being prepared.'}
+                      ? `${status.issued_tickets} ticket${Number(status.issued_tickets) === 1 ? '' : 's'} issued and ready.`
+                      : 'Your ticket order is paid. Open your ticket wallet to finish ticket issuance.'}
                 </p>
               </div>
             </div>
 
             <div className="vult-pay-summary">
               <span>Total paid</span>
-              <strong>{money(status.total_amount, status.currency)}</strong>
+              <strong>
+                {money(status.total_amount, status.currency)}
+              </strong>
             </div>
 
-            <Link className="button vult-action-primary" href={returnHref}>
-              {kind === 'vote' ? 'Back to Nominees' : 'Back to Event'}
-            </Link>
+            {kind === 'ticket' ? (
+              <div className="vult-pay-actions">
+                <Link
+                  className="button vult-action-primary"
+                  href={`/tickets/order/${token}`}
+                >
+                  View My QR Tickets
+                </Link>
+
+                <Link
+                  className="button secondary"
+                  href={returnHref}
+                >
+                  Back to Event
+                </Link>
+              </div>
+            ) : (
+              <Link
+                className="button vult-action-primary"
+                href={returnHref}
+              >
+                Back to Nominees
+              </Link>
+            )}
           </>
         ) : method === 'momo' ? (
           <>
@@ -154,17 +162,15 @@ export async function VultPaymentStatusPage({
               </div>
             )}
 
-            <WaitingNotice failed={status.last_attempt_status === 'failed'} />
+            <WaitingNotice
+              failed={status.last_attempt_status === 'failed'}
+            />
 
             <div className="vult-pay-secondary-actions">
-              <button
-                type="button"
-                className="button secondary"
-                onClick={undefined}
-                disabled
-              >
-                Order {status.order_number}
-              </button>
+              <div className="vult-pay-order-reference">
+                <span>Order</span>
+                <strong>{status.order_number}</strong>
+              </div>
 
               <Link className="button secondary" href={returnHref}>
                 Back to {kind === 'vote' ? 'Nominees' : 'Event'}
@@ -193,7 +199,6 @@ export async function VultPaymentStatusPage({
 
             {qrDataUrl ? (
               <div className="vult-qr-card">
-                {/* qrcode creates an in-memory data URL from the Vult payment link. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={qrDataUrl}
@@ -215,7 +220,9 @@ export async function VultPaymentStatusPage({
               <OpenVultPayment href={status.payment_link} />
             )}
 
-            <WaitingNotice failed={status.last_attempt_status === 'failed'} />
+            <WaitingNotice
+              failed={status.last_attempt_status === 'failed'}
+            />
 
             <div className="vult-pay-secondary-actions">
               <div className="vult-pay-order-reference">
@@ -243,11 +250,7 @@ export async function VultPaymentStatusPage({
   )
 }
 
-function WaitingNotice({
-  failed,
-}: {
-  failed: boolean
-}) {
+function WaitingNotice({ failed }: { failed: boolean }) {
   return (
     <div className="vult-waiting-notice">
       <span aria-hidden="true">⌛</span>

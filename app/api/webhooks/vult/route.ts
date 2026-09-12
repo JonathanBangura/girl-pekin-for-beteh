@@ -4,6 +4,8 @@ import {
   parseVultWebhookPayload,
   verifyVultWebhookAuthorization,
 } from '@/lib/vult/webhook'
+import { issueTicketsForPaidOrder } from '@/lib/ticketing/ticket-issuance'
+import { deliverTicketOrderEmail } from '@/lib/ticketing/ticket-email'
 
 export const runtime = 'nodejs'
 
@@ -153,7 +155,10 @@ export async function POST(request: NextRequest) {
 
     eventId = existing.id
   } else if (insertEventError || !insertedEvent) {
-    console.error('Unable to persist Vult webhook', insertEventError)
+    console.error(
+      'Unable to persist Vult webhook',
+      insertEventError,
+    )
 
     return NextResponse.json(
       { error: 'Unable to persist webhook.' },
@@ -163,8 +168,6 @@ export async function POST(request: NextRequest) {
     eventId = insertedEvent.id
   }
 
-  // Vult's supplied documentation explicitly says a "failed" webhook means
-  // the customer may retry later, so the merchant order must stay pending.
   if (payload.status === 'failed') {
     const currentPayload =
       resolved.payment.provider_payload &&
@@ -219,9 +222,6 @@ export async function POST(request: NextRequest) {
 
       if (error) throw error
     } else {
-      // Payment/order become paid now. Individual QR ticket issuance remains
-      // Phase 6B so raw QR delivery material is not lost before email/QR
-      // delivery is connected.
       const { error } = await admin.rpc(
         'mark_ticket_payment_success',
         {
@@ -237,6 +237,22 @@ export async function POST(request: NextRequest) {
       )
 
       if (error) throw error
+
+      // Ticket issuance is idempotent. If webhook processing is retried,
+      // the unique item/sequence constraint prevents duplicate tickets.
+      await issueTicketsForPaidOrder(resolved.orderId)
+
+      // Email failure must not roll back a successful payment or ticket
+      // issuance. The delivery status is recorded and the customer can resend
+      // from the secure ticket-wallet page.
+      try {
+        await deliverTicketOrderEmail(resolved.orderId)
+      } catch (deliveryError) {
+        console.error(
+          'Ticket email delivery failed after successful payment',
+          deliveryError,
+        )
+      }
     }
 
     await admin
@@ -265,9 +281,6 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', eventId)
 
-    // Vult currently sends the webhook only once. The event is safely stored
-    // for reconciliation and a replay of the same webhook can reprocess it
-    // because processed_at remains null.
     return NextResponse.json({
       received: true,
       processed: false,
