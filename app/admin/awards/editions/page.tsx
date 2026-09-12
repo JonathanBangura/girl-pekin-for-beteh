@@ -1,5 +1,20 @@
-import { EditionsLivePage } from '@/components/portal/awards-live'
+import { EditionsManagementPage } from '@/components/portal/award-edition-management'
 
-export default function Page() {
-  return <EditionsLivePage />
+type PageProps = {
+  searchParams: Promise<{
+    created?: string
+    updated?: string
+    error?: string
+  }>
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams
+  return (
+    <EditionsManagementPage
+      created={params.created}
+      updated={params.updated}
+      error={params.error}
+    />
+  )
 }

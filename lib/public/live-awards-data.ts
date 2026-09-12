@@ -46,7 +46,7 @@ async function loadPublicEditionById(
   const { data: edition } = await supabase
     .from('award_editions')
     .select(
-      'id, award_id, year, edition_number, edition_label, theme, description, status, voting_starts_at, voting_ends_at, leaderboard_visibility, branding',
+      'id, award_id, year, edition_number, edition_label, theme, description, status, is_public, voting_starts_at, voting_ends_at, leaderboard_visibility, ceremony_event_id, branding',
     )
     .eq('id', editionId)
     .maybeSingle()
@@ -112,6 +112,35 @@ async function loadPublicEditionById(
   }
 }
 
+async function loadEditionEvent(
+  supabase: ReturnType<typeof createPublicClient>,
+  edition: { id: string; ceremony_event_id?: string | null },
+) {
+  if (edition.ceremony_event_id) {
+    const { data: ceremony } = await supabase
+      .from('events')
+      .select(
+        'id, award_edition_id, slug, title, summary, description, venue, starts_at, ends_at, access_type, status, cover_image_url',
+      )
+      .eq('id', edition.ceremony_event_id)
+      .maybeSingle()
+
+    if (ceremony) return ceremony
+  }
+
+  const { data: event } = await supabase
+    .from('events')
+    .select(
+      'id, award_edition_id, slug, title, summary, description, venue, starts_at, ends_at, access_type, status, cover_image_url',
+    )
+    .eq('award_edition_id', edition.id)
+    .order('starts_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  return event ?? null
+}
+
 export async function getPublicAwardsIndex() {
   const supabase = createPublicClient()
 
@@ -127,15 +156,7 @@ export async function getPublicAwardsIndex() {
   const base = await loadPublicEditionById(supabase, edition.id)
   if (!base) return null
 
-  const { data: event } = await supabase
-    .from('events')
-    .select(
-      'id, award_edition_id, slug, title, summary, venue, starts_at, access_type, status, cover_image_url',
-    )
-    .eq('award_edition_id', edition.id)
-    .order('starts_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  const event = await loadEditionEvent(supabase, base.edition)
 
   const { data: ticketTypes } = event
     ? await supabase
@@ -149,7 +170,7 @@ export async function getPublicAwardsIndex() {
 
   return {
     ...base,
-    event: event ?? null,
+    event,
     ticketTypes: ticketTypes ?? [],
   }
 }
@@ -166,7 +187,6 @@ export async function getPublicAwardEditionBySlug(slug: string) {
     .maybeSingle()
 
   let editionId = event?.award_edition_id ?? null
-  let resolvedEvent = event ?? null
 
   if (!editionId) {
     const { data: award } = await supabase
@@ -185,20 +205,6 @@ export async function getPublicAwardEditionBySlug(slug: string) {
         .maybeSingle()
 
       editionId = edition?.id ?? null
-
-      if (editionId) {
-        const { data: fallbackEvent } = await supabase
-          .from('events')
-          .select(
-            'id, award_edition_id, slug, title, summary, description, venue, starts_at, ends_at, access_type, status, cover_image_url',
-          )
-          .eq('award_edition_id', editionId)
-          .order('starts_at', { ascending: true })
-          .limit(1)
-          .maybeSingle()
-
-        resolvedEvent = fallbackEvent ?? null
-      }
     }
   }
 
@@ -206,6 +212,8 @@ export async function getPublicAwardEditionBySlug(slug: string) {
 
   const base = await loadPublicEditionById(supabase, editionId)
   if (!base) return null
+
+  const resolvedEvent = (await loadEditionEvent(supabase, base.edition)) ?? event ?? null
 
   const { data: ticketTypes } = resolvedEvent
     ? await supabase
@@ -245,14 +253,9 @@ export async function getPublicNomineeDirectory({
   let nominees = data.nominees
 
   if (category) {
-    const selectedCategory = data.categories.find(
-      (item) => item.slug === category,
-    )
-
+    const selectedCategory = data.categories.find((item) => item.slug === category)
     nominees = selectedCategory
-      ? nominees.filter(
-          (nominee) => nominee.category_id === selectedCategory.id,
-        )
+      ? nominees.filter((nominee) => nominee.category_id === selectedCategory.id)
       : []
   }
 

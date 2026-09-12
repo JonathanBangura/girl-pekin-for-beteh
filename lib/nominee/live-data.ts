@@ -34,29 +34,24 @@ export async function getMyNomineeDashboardData() {
     }
   }
 
-  const [
-    { data: category },
-    { data: edition },
-    { data: voteSummary },
-  ] = await Promise.all([
-    supabase
-      .from('award_categories')
-      .select('id, name, slug')
-      .eq('id', nominee.category_id)
-      .maybeSingle(),
-    supabase
-      .from('award_editions')
-      .select(
-        'id, year, edition_label, status, leaderboard_visibility, voting_starts_at, voting_ends_at',
-      )
-      .eq('id', nominee.award_edition_id)
-      .maybeSingle(),
-    supabase.rpc('get_my_nominee_vote_summary'),
-  ])
+  const [{ data: category }, { data: edition }, { data: voteSummary }] =
+    await Promise.all([
+      supabase
+        .from('award_categories')
+        .select('id, name, slug')
+        .eq('id', nominee.category_id)
+        .maybeSingle(),
+      supabase
+        .from('award_editions')
+        .select(
+          'id, year, edition_label, status, leaderboard_visibility, voting_starts_at, voting_ends_at, ceremony_event_id',
+        )
+        .eq('id', nominee.award_edition_id)
+        .maybeSingle(),
+      supabase.rpc('get_my_nominee_vote_summary'),
+    ])
 
-  const summary = (voteSummary ?? []).find(
-    (row) => row.nominee_id === nominee.id,
-  )
+  const summary = (voteSummary ?? []).find((row) => row.nominee_id === nominee.id)
 
   let rank: number | null = null
 
@@ -66,20 +61,33 @@ export async function getMyNomineeDashboardData() {
       { p_award_edition_id: edition.id },
     )
 
-    const row = (totals ?? []).find(
-      (item) => item.nominee_id === nominee.id,
-    )
-
+    const row = (totals ?? []).find((item) => item.nominee_id === nominee.id)
     rank = row ? toNumber(row.rank_position) : null
   }
 
-  const { data: event } = await supabase
-    .from('events')
-    .select('id, slug, title, venue, starts_at, status')
-    .eq('award_edition_id', nominee.award_edition_id)
-    .order('starts_at', { ascending: true })
-    .limit(1)
-    .maybeSingle()
+  let event = null
+
+  if (edition?.ceremony_event_id) {
+    const { data } = await supabase
+      .from('events')
+      .select('id, slug, title, venue, starts_at, status')
+      .eq('id', edition.ceremony_event_id)
+      .maybeSingle()
+
+    event = data ?? null
+  }
+
+  if (!event) {
+    const { data } = await supabase
+      .from('events')
+      .select('id, slug, title, venue, starts_at, status')
+      .eq('award_edition_id', nominee.award_edition_id)
+      .order('starts_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
+    event = data ?? null
+  }
 
   return {
     nominee,
@@ -87,6 +95,6 @@ export async function getMyNomineeDashboardData() {
     edition: edition ?? null,
     totalVotes: summary ? toNumber(summary.total_votes) : 0,
     rank,
-    event: event ?? null,
+    event,
   }
 }
