@@ -1,2 +1,5 @@
-import { AdminPage } from '@/components/portal/admin-pages'
-export default function Page(){return <AdminPage section="Finance"/>}
+import { FinanceOverviewLivePage } from '@/components/portal/finance-live'
+
+export default function FinancePage() {
+  return <FinanceOverviewLivePage />
+}
