@@ -1,2 +1,19 @@
-import { AdminPage } from '@/components/portal/admin-pages'
-export default function Page(){return <AdminPage section="Audit Logs"/>}
+import { AuditLogsLivePage } from '@/components/portal/users-roles-audit'
+
+type PageProps = {
+  searchParams: Promise<{
+    actor?: string
+    action?: string
+    entity?: string
+    from?: string
+    to?: string
+  }>
+}
+
+export default async function AuditPage({
+  searchParams,
+}: PageProps) {
+  const filters = await searchParams
+
+  return <AuditLogsLivePage filters={filters} />
+}
