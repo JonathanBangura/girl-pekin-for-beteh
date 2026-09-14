@@ -10697,3 +10697,38 @@ textarea:focus-visible {
     min-height: 50px;
   }
 }
+/* ADMIN / NOMINEE PORTAL SIDEBAR STICKY HOTFIX
+   Append this block at the END of app/globals.css.
+
+   Desktop/tablet (>800px):
+   - sidebar stays pinned to the viewport
+   - only the sidebar navigation list scrolls when it is taller than the screen
+   - page content continues scrolling independently
+
+   Mobile (<=800px) is intentionally untouched because the existing
+   off-canvas sidebar already uses position: fixed.
+*/
+@media (min-width: 801px) {
+  .portal-side {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .portal-nav-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+  }
+
+  .portal-main {
+    min-width: 0;
+    min-height: 100vh;
+  }
+}
