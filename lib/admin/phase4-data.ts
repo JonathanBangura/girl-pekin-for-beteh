@@ -1,35 +1,41 @@
-import { requirePermission } from '@/lib/auth/guards'
-import { createClient } from '@/lib/supabase/server'
+import { requireAnyAssignedPermission } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function getCategoryManagementData() {
-  await requirePermission(
-    'awards.manage',
-    '/admin/awards/categories',
-  )
-
-  const admin = createAdminClient()
+  const { supabase } =
+    await requireAnyAssignedPermission(
+      'awards.manage',
+      '/admin/awards/categories',
+    )
 
   const [
     editionsResult,
     categoriesResult,
     nomineesResult,
   ] = await Promise.all([
-    admin
+    supabase
       .from('award_editions')
-      .select('id, year, edition_label, status')
+      .select(
+        'id,year,edition_label,status',
+      )
       .neq('status', 'archived')
-      .order('year', { ascending: false }),
-    admin
+      .order('year', {
+        ascending: false,
+      }),
+    supabase
       .from('award_categories')
       .select(
-        'id, award_edition_id, name, slug, description, is_public, is_active, sort_order, updated_at',
+        'id,award_edition_id,name,slug,description,is_public,is_active,sort_order,updated_at',
       )
-      .order('sort_order', { ascending: true })
-      .order('name', { ascending: true }),
-    admin
+      .order('sort_order', {
+        ascending: true,
+      })
+      .order('name', {
+        ascending: true,
+      }),
+    supabase
       .from('nominees')
-      .select('id, category_id'),
+      .select('id,category_id'),
   ])
 
   if (editionsResult.error) {
@@ -62,35 +68,40 @@ export async function getCategoryManagementData() {
     )
   }
 
-  const nomineeCounts = new Map<string, number>()
+  const nomineeCounts =
+    new Map<string, number>()
 
-  for (const nominee of nomineesResult.data ?? []) {
+  for (
+    const nominee of
+    nomineesResult.data ?? []
+  ) {
     nomineeCounts.set(
       nominee.category_id,
-      (nomineeCounts.get(nominee.category_id) ?? 0) + 1,
+      (nomineeCounts.get(
+        nominee.category_id,
+      ) ?? 0) + 1,
     )
   }
 
   return {
     editions: editionsResult.data ?? [],
-    categories: (categoriesResult.data ?? []).map(
-      (category) => ({
-        ...category,
-        nominee_count:
-          nomineeCounts.get(category.id) ?? 0,
-      }),
-    ),
+    categories: (
+      categoriesResult.data ?? []
+    ).map((category) => ({
+      ...category,
+      nominee_count:
+        nomineeCounts.get(category.id) ??
+        0,
+    })),
   }
 }
 
 export async function getNomineeManagementData() {
-  await requirePermission(
-    'awards.manage',
-    '/admin/awards/nominees',
-  )
-
-  const admin = createAdminClient()
-  const supabase = await createClient()
+  const { supabase } =
+    await requireAnyAssignedPermission(
+      'awards.manage',
+      '/admin/awards/nominees',
+    )
 
   const [
     editionsResult,
@@ -99,29 +110,42 @@ export async function getNomineeManagementData() {
     ledgerResult,
     { data: canManageUsers },
   ] = await Promise.all([
-    admin
+    supabase
       .from('award_editions')
-      .select('id, year, edition_label, status')
+      .select(
+        'id,year,edition_label,status',
+      )
       .neq('status', 'archived')
-      .order('year', { ascending: false }),
-    admin
+      .order('year', {
+        ascending: false,
+      }),
+    supabase
       .from('award_categories')
       .select(
-        'id, award_edition_id, name, is_active',
+        'id,award_edition_id,name,is_active',
       )
-      .order('sort_order', { ascending: true })
-      .order('name', { ascending: true }),
-    admin
+      .order('sort_order', {
+        ascending: true,
+      })
+      .order('name', {
+        ascending: true,
+      }),
+    supabase
       .from('nominees')
       .select(
-        'id, award_edition_id, category_id, auth_user_id, nominee_code, full_name, institution, bio, photo_url, status, is_public, sort_order, updated_at',
+        'id,award_edition_id,category_id,auth_user_id,nominee_code,full_name,institution,bio,photo_url,status,is_public,sort_order,updated_at',
       )
-      .order('created_at', { ascending: false }),
-    admin
+      .order('created_at', {
+        ascending: false,
+      }),
+    supabase
       .from('vote_ledger')
-      .select('nominee_id, quantity_delta'),
+      .select(
+        'nominee_id,quantity_delta',
+      ),
     supabase.rpc('has_permission', {
-      requested_permission_code: 'users.manage',
+      requested_permission_code:
+        'users.manage',
       requested_scope_type: null,
       requested_scope_id: null,
     }),
@@ -152,7 +176,9 @@ export async function getNomineeManagementData() {
       'getNomineeManagementData nominees',
       nomineesResult.error,
     )
-    throw new Error('Unable to load nominees.')
+    throw new Error(
+      'Unable to load nominees.',
+    )
   }
 
   if (ledgerResult.error) {
@@ -160,12 +186,17 @@ export async function getNomineeManagementData() {
       'getNomineeManagementData ledger',
       ledgerResult.error,
     )
-    throw new Error('Unable to load vote totals.')
+    throw new Error(
+      'Unable to load vote totals.',
+    )
   }
 
-  const categories = categoriesResult.data ?? []
-  const nominees = nomineesResult.data ?? []
-  const ledger = ledgerResult.data ?? []
+  const categories =
+    categoriesResult.data ?? []
+  const nominees =
+    nomineesResult.data ?? []
+  const ledger =
+    ledgerResult.data ?? []
 
   const categoryMap = new Map(
     categories.map((category) => [
@@ -174,21 +205,27 @@ export async function getNomineeManagementData() {
     ]),
   )
 
-  const totals = new Map<string, number>()
+  const totals =
+    new Map<string, number>()
 
   for (const entry of ledger) {
     totals.set(
       entry.nominee_id,
-      (totals.get(entry.nominee_id) ?? 0) +
-        entry.quantity_delta,
+      (totals.get(entry.nominee_id) ??
+        0) + entry.quantity_delta,
     )
   }
 
-  const linkedEmails = new Map<string, string>()
+  const linkedEmails =
+    new Map<string, string>()
 
   if (canManageUsers === true) {
+    const admin = createAdminClient()
+
     for (const nominee of nominees) {
-      if (!nominee.auth_user_id) continue
+      if (!nominee.auth_user_id) {
+        continue
+      }
 
       const { data } =
         await admin.auth.admin.getUserById(
@@ -205,18 +242,27 @@ export async function getNomineeManagementData() {
   }
 
   return {
-    editions: editionsResult.data ?? [],
+    editions:
+      editionsResult.data ?? [],
     categories,
-    canManageUsers: canManageUsers === true,
-    nominees: nominees.map((nominee) => ({
-      ...nominee,
-      category_name:
-        categoryMap.get(nominee.category_id) ?? '—',
-      total_votes: totals.get(nominee.id) ?? 0,
-      linked_email: nominee.auth_user_id
-        ? linkedEmails.get(nominee.auth_user_id) ??
-          null
-        : null,
-    })),
+    canManageUsers:
+      canManageUsers === true,
+    nominees: nominees.map(
+      (nominee) => ({
+        ...nominee,
+        category_name:
+          categoryMap.get(
+            nominee.category_id,
+          ) ?? '—',
+        total_votes:
+          totals.get(nominee.id) ?? 0,
+        linked_email:
+          nominee.auth_user_id
+            ? linkedEmails.get(
+                nominee.auth_user_id,
+              ) ?? null
+            : null,
+      }),
+    ),
   }
 }

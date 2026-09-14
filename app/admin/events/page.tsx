@@ -1,5 +1,21 @@
-import { EventsManagementLivePage } from '@/components/portal/ticketing-management-live'
+import { EventsManagementLivePage } from '@/components/portal/event-management-live'
 
-export default function Page() {
-  return <EventsManagementLivePage />
+type PageProps = {
+  searchParams: Promise<{
+    saved?: string
+    error?: string
+  }>
+}
+
+export default async function Page({
+  searchParams,
+}: PageProps) {
+  const params = await searchParams
+
+  return (
+    <EventsManagementLivePage
+      saved={params.saved}
+      error={params.error}
+    />
+  )
 }

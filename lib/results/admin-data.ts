@@ -1,32 +1,28 @@
-import { requirePermission } from '@/lib/auth/guards'
+import { requireAnyAssignedPermission } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function getResultsAdminData(
   requestedEditionId?: string,
 ) {
-  const { supabase } = await requirePermission(
-    'results.manage',
-    '/admin/awards/results',
-  )
-
-  const admin = createAdminClient()
+  const { supabase } =
+    await requireAnyAssignedPermission(
+      'results.manage',
+      '/admin/awards/results',
+    )
 
   const [
-    awardsResult,
     editionsResult,
     certificationsResult,
   ] = await Promise.all([
-    admin
-      .from('awards')
-      .select('id,name,slug,status')
-      .order('name', { ascending: true }),
-    admin
+    supabase
       .from('award_editions')
       .select(
         'id,award_id,year,edition_label,status,is_public,voting_starts_at,voting_ends_at,leaderboard_visibility,leaderboard_frozen_at,results_published_at',
       )
-      .order('year', { ascending: false }),
-    admin
+      .order('year', {
+        ascending: false,
+      }),
+    supabase
       .from('result_certifications')
       .select(
         'id,award_edition_id,award_name_snapshot,award_slug_snapshot,edition_label_snapshot,year_snapshot,status,frozen_at,snapshot_at,reconciled_at,review_started_at,approved_at,published_at,created_at,updated_at',
@@ -34,47 +30,105 @@ export async function getResultsAdminData(
   ])
 
   for (const [label, result] of [
-    ['awards', awardsResult],
     ['editions', editionsResult],
-    ['certifications', certificationsResult],
+    [
+      'certifications',
+      certificationsResult,
+    ],
   ] as const) {
     if (result.error) {
-      console.error(`results admin ${label}`, result.error)
-      throw new Error(`Unable to load ${label}.`)
+      console.error(
+        `results admin ${label}`,
+        result.error,
+      )
+      throw new Error(
+        `Unable to load ${label}.`,
+      )
     }
   }
 
-  const awards = awardsResult.data ?? []
-  const editions = editionsResult.data ?? []
-  const certifications = certificationsResult.data ?? []
+  const editions =
+    editionsResult.data ?? []
+  const certifications =
+    certificationsResult.data ?? []
+
+  const awardIds = [
+    ...new Set(
+      editions.map(
+        (edition) => edition.award_id,
+      ),
+    ),
+  ]
+
+  const admin = createAdminClient()
+
+  let awards: any[] = []
+
+  if (awardIds.length) {
+    const awardsResult = await admin
+      .from('awards')
+      .select('id,name,slug,status')
+      .in('id', awardIds)
+      .order('name', {
+        ascending: true,
+      })
+
+    if (awardsResult.error) {
+      console.error(
+        'results admin awards',
+        awardsResult.error,
+      )
+      throw new Error(
+        'Unable to load awards.',
+      )
+    }
+
+    awards =
+      awardsResult.data ?? []
+  }
 
   const awardMap = new Map(
-    awards.map((award) => [award.id, award]),
-  )
-  const certificationMap = new Map(
-    certifications.map((certification) => [
-      certification.award_edition_id,
-      certification,
+    awards.map((award) => [
+      award.id,
+      award,
     ]),
   )
 
-  const enrichedEditions = editions.map((edition) => ({
-    ...edition,
-    award: awardMap.get(edition.award_id) ?? null,
-    certification:
-      certificationMap.get(edition.id) ?? null,
-  }))
+  const certificationMap = new Map(
+    certifications.map(
+      (certification) => [
+        certification.award_edition_id,
+        certification,
+      ],
+    ),
+  )
+
+  const enrichedEditions =
+    editions.map((edition) => ({
+      ...edition,
+      award:
+        awardMap.get(
+          edition.award_id,
+        ) ?? null,
+      certification:
+        certificationMap.get(
+          edition.id,
+        ) ?? null,
+    }))
 
   const selectedEdition =
     enrichedEditions.find(
-      (edition) => edition.id === requestedEditionId,
+      (edition) =>
+        edition.id ===
+        requestedEditionId,
     ) ??
-    enrichedEditions.find((edition) =>
-      [
-        'voting_closed',
-        'results_review',
-        'results_published',
-      ].includes(edition.status),
+    enrichedEditions.find(
+      (edition) =>
+        [
+          'voting_closed',
+          'results_review',
+          'results_published',
+        ].includes(edition.status),
     ) ??
     enrichedEditions[0] ??
     null
@@ -98,23 +152,37 @@ export async function getResultsAdminData(
     categoriesResult,
     nomineesResult,
   ] = await Promise.all([
-    supabase.rpc('get_results_reconciliation_issues', {
-      p_award_edition_id: selectedEdition.id,
-    }),
-    admin
+    supabase.rpc(
+      'get_results_reconciliation_issues',
+      {
+        p_award_edition_id:
+          selectedEdition.id,
+      },
+    ),
+    supabase
       .from('award_categories')
       .select(
         'id,award_edition_id,name,slug,is_public,is_active,sort_order',
       )
-      .eq('award_edition_id', selectedEdition.id)
-      .order('sort_order', { ascending: true })
-      .order('name', { ascending: true }),
-    admin
+      .eq(
+        'award_edition_id',
+        selectedEdition.id,
+      )
+      .order('sort_order', {
+        ascending: true,
+      })
+      .order('name', {
+        ascending: true,
+      }),
+    supabase
       .from('nominees')
       .select(
         'id,award_edition_id,category_id,nominee_code,full_name,institution,status,is_public,photo_url',
       )
-      .eq('award_edition_id', selectedEdition.id),
+      .eq(
+        'award_edition_id',
+        selectedEdition.id,
+      ),
   ])
 
   if (issuesResult.error) {
@@ -132,7 +200,9 @@ export async function getResultsAdminData(
       'results admin categories',
       categoriesResult.error,
     )
-    throw new Error('Unable to load result categories.')
+    throw new Error(
+      'Unable to load result categories.',
+    )
   }
 
   if (nomineesResult.error) {
@@ -140,50 +210,78 @@ export async function getResultsAdminData(
       'results admin nominees',
       nomineesResult.error,
     )
-    throw new Error('Unable to load result nominees.')
+    throw new Error(
+      'Unable to load result nominees.',
+    )
   }
 
   const certification =
-    selectedEdition.certification ?? null
+    selectedEdition.certification ??
+    null
 
   let entries: any[] = []
 
   if (certification) {
-    const { data, error } = await admin
-      .from('result_entries')
-      .select(
-        'id,certification_id,award_edition_id,category_id,nominee_id,category_name_snapshot,nominee_code_snapshot,nominee_name_snapshot,institution_snapshot,photo_url_snapshot,nominee_status_snapshot,eligible,snapshot_votes,snapshot_rank,decision,decision_note,decided_at',
-      )
-      .eq('certification_id', certification.id)
-      .order('category_id', { ascending: true })
-      .order('snapshot_rank', { ascending: true })
+    const { data, error } =
+      await supabase
+        .from('result_entries')
+        .select(
+          'id,certification_id,award_edition_id,category_id,nominee_id,category_name_snapshot,nominee_code_snapshot,nominee_name_snapshot,institution_snapshot,photo_url_snapshot,nominee_status_snapshot,eligible,snapshot_votes,snapshot_rank,decision,decision_note,decided_at',
+        )
+        .eq(
+          'certification_id',
+          certification.id,
+        )
+        .order('category_id', {
+          ascending: true,
+        })
+        .order('snapshot_rank', {
+          ascending: true,
+        })
 
     if (error) {
-      console.error('results admin entries', error)
-      throw new Error('Unable to load result snapshot entries.')
+      console.error(
+        'results admin entries',
+        error,
+      )
+      throw new Error(
+        'Unable to load result snapshot entries.',
+      )
     }
 
     entries = data ?? []
   }
 
   const categoryMap = new Map(
-    (categoriesResult.data ?? []).map((category) => [
+    (
+      categoriesResult.data ?? []
+    ).map((category) => [
       category.id,
       category,
     ]),
   )
+
   const nomineeMap = new Map(
-    (nomineesResult.data ?? []).map((nominee) => [
+    (
+      nomineesResult.data ?? []
+    ).map((nominee) => [
       nominee.id,
       nominee,
     ]),
   )
 
-  const enrichedEntries = entries.map((entry) => ({
-    ...entry,
-    category: categoryMap.get(entry.category_id) ?? null,
-    nominee: nomineeMap.get(entry.nominee_id) ?? null,
-  }))
+  const enrichedEntries =
+    entries.map((entry) => ({
+      ...entry,
+      category:
+        categoryMap.get(
+          entry.category_id,
+        ) ?? null,
+      nominee:
+        nomineeMap.get(
+          entry.nominee_id,
+        ) ?? null,
+    }))
 
   const requiredCategories = (
     categoriesResult.data ?? []
@@ -193,30 +291,51 @@ export async function getResultsAdminData(
       category.is_active &&
       enrichedEntries.some(
         (entry) =>
-          entry.category_id === category.id &&
+          entry.category_id ===
+            category.id &&
           entry.eligible,
       ),
   )
 
-  const selectedWinnerCount = new Set(
-    enrichedEntries
-      .filter((entry) => entry.decision === 'winner')
-      .map((entry) => entry.category_id),
-  ).size
+  const selectedWinnerCount =
+    new Set(
+      enrichedEntries
+        .filter(
+          (entry) =>
+            entry.decision ===
+            'winner',
+        )
+        .map(
+          (entry) =>
+            entry.category_id,
+        ),
+    ).size
 
   let snapshotStale = false
 
   if (certification?.snapshot_at) {
     const nomineeIds = (
       nomineesResult.data ?? []
-    ).map((nominee) => nominee.id)
+    ).map(
+      (nominee) => nominee.id,
+    )
 
     if (nomineeIds.length) {
-      const { count, error } = await admin
-        .from('vote_ledger')
-        .select('id', { count: 'exact', head: true })
-        .in('nominee_id', nomineeIds)
-        .gt('created_at', certification.snapshot_at)
+      const { count, error } =
+        await supabase
+          .from('vote_ledger')
+          .select('id', {
+            count: 'exact',
+            head: true,
+          })
+          .in(
+            'nominee_id',
+            nomineeIds,
+          )
+          .gt(
+            'created_at',
+            certification.snapshot_at,
+          )
 
       if (error) {
         console.error(
@@ -224,7 +343,8 @@ export async function getResultsAdminData(
           error,
         )
       } else {
-        snapshotStale = (count ?? 0) > 0
+        snapshotStale =
+          (count ?? 0) > 0
       }
     }
   }
@@ -233,10 +353,13 @@ export async function getResultsAdminData(
     editions: enrichedEditions,
     selectedEdition,
     certification,
-    issues: issuesResult.data ?? [],
-    categories: categoriesResult.data ?? [],
+    issues:
+      issuesResult.data ?? [],
+    categories:
+      categoriesResult.data ?? [],
     entries: enrichedEntries,
-    requiredCategoryCount: requiredCategories.length,
+    requiredCategoryCount:
+      requiredCategories.length,
     selectedWinnerCount,
     snapshotStale,
   }
