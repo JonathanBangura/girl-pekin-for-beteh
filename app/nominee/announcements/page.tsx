@@ -1,2 +1,5 @@
-import { NomineePage } from '@/components/portal/nominee-pages'
-export default function Page(){return <NomineePage section="Announcements"/>}
+import { NomineeAnnouncementsLivePage } from '@/components/portal/nominee-live-pages'
+
+export default function NomineeAnnouncementsPage() {
+  return <NomineeAnnouncementsLivePage />
+}
