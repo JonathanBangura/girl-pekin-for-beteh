@@ -493,6 +493,7 @@ export async function NomineesManagementPage({
                               <option value="submitted">Submitted</option>
                               <option value="under_review">Under Review</option>
                               <option value="approved">Approved</option>
+                              <option value="rejected">Rejected</option>
                               <option value="published">Published</option>
                               <option value="suspended">Suspended</option>
                               <option value="disqualified">Disqualified</option>

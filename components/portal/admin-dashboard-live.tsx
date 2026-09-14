@@ -133,11 +133,11 @@ export async function AdminDashboardLive() {
           </div>
 
           <div className="v2-attention-list">
-            <Link href="/admin/awards/nominees">
+            <Link href="/admin/awards/applications">
               <FileText size={16} />
               <span>
-                <b>{data.pendingNominees} nominees awaiting review</b>
-                <small>Awards / Nominees</small>
+                <b>{data.pendingNominees} applications awaiting review</b>
+                <small>Awards / Applications</small>
               </span>
               <ArrowUpRight size={14} />
             </Link>

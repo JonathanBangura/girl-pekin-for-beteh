@@ -68,6 +68,7 @@ const nomineeStatuses = new Set([
   'submitted',
   'under_review',
   'approved',
+  'rejected',
   'published',
   'suspended',
   'disqualified',
