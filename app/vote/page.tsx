@@ -1,2 +1,5 @@
-import { VoteScreen } from '@/components/voting/voting'
-export default function VotePage() { return <VoteScreen /> }
+import { redirect } from 'next/navigation'
+
+export default function VotePage() {
+  redirect('/nominees')
+}
