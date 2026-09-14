@@ -1,2 +1,5 @@
-import { ProgramsPage } from '@/components/public/content-pages'
-export default function Page(){return <ProgramsPage/>}
+import { ProgramsLivePage } from '@/components/public/cms-pages'
+
+export default function Page() {
+  return <ProgramsLivePage />
+}

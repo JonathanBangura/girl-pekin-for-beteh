@@ -1,2 +1,5 @@
-import { SimplePublicPage } from '@/components/public/content-pages'
-export default function Page(){return <SimplePublicPage kind="news"/>}
+import { NewsLivePage } from '@/components/public/cms-pages'
+
+export default function Page() {
+  return <NewsLivePage />
+}

@@ -1,2 +1,5 @@
-import { AboutPage } from '@/components/public/content-pages'
-export default function Page(){return <AboutPage/>}
+import { AboutLivePage } from '@/components/public/cms-pages'
+
+export default function Page() {
+  return <AboutLivePage />
+}
