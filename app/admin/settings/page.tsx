@@ -1,2 +1,5 @@
-import { AdminPage } from '@/components/portal/admin-pages'
-export default function Page(){return <AdminPage section="Settings"/>}
+import { PlatformSettingsPage } from '@/components/portal/platform-settings'
+
+export default function SettingsPage() {
+  return <PlatformSettingsPage />
+}
