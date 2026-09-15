@@ -8,6 +8,11 @@ import {
   updateAwardEdition,
 } from '@/lib/admin/scoped-award-edition-actions'
 
+import {
+  getAwardManagementData,
+  getEditionManagementData,
+} from '@/lib/admin/award-edition-data'
+
 function humanize(value: string) {
   return value
     .replaceAll('_', ' ')

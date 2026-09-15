@@ -11,6 +11,11 @@ import {
   unlinkNomineeUser,
 } from '@/lib/admin/actions'
 
+import {
+  getCategoryManagementData,
+  getNomineeManagementData,
+} from '@/lib/admin/phase4-data'
+
 function humanize(value: string) {
   return value.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
