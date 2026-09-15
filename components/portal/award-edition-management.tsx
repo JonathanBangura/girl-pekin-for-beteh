@@ -3,7 +3,7 @@ import {
   createAwardEdition,
   updateAward,
   updateAwardEdition,
-} from '@/lib/admin/award-edition-actions'
+} from '@/lib/admin/scoped-award-edition-actions'
 import {
   getAwardManagementData,
   getEditionManagementData,

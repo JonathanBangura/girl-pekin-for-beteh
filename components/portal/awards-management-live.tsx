@@ -6,7 +6,7 @@ import {
   unlinkNomineeUser,
   updateCategory,
   updateNominee,
-} from '@/lib/admin/actions'
+} from '@/lib/admin/scoped-awards-actions'
 import {
   getCategoryManagementData,
   getNomineeManagementData,
