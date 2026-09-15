@@ -2,15 +2,14 @@ import {
   changeNomineeStatus,
   createCategory,
   createNominee,
-  linkNomineeUser,
-  unlinkNomineeUser,
   updateCategory,
   updateNominee,
 } from '@/lib/admin/scoped-awards-actions'
+
 import {
-  getCategoryManagementData,
-  getNomineeManagementData,
-} from '@/lib/admin/phase4-data'
+  linkNomineeUser,
+  unlinkNomineeUser,
+} from '@/lib/admin/actions'
 
 function humanize(value: string) {
   return value.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())

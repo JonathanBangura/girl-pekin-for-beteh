@@ -5,12 +5,6 @@ import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-export {
-  createAward,
-  createAwardEdition,
-  updateAward,
-} from '@/lib/admin/award-edition-actions'
-
 const editableEditionStatuses = new Set([
   'draft',
   'published',

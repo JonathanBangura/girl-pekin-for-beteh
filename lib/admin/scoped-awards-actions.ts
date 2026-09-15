@@ -8,11 +8,6 @@ import {
 } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-export {
-  linkNomineeUser,
-  unlinkNomineeUser,
-} from '@/lib/admin/actions'
-
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? '').trim()
 }
