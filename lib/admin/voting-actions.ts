@@ -5,15 +5,25 @@ import { redirect } from 'next/navigation'
 import { requirePermission } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-function text(formData: FormData, key: string) {
-  return String(formData.get(key) ?? '').trim()
+function text(
+  formData: FormData,
+  key: string,
+) {
+  return String(
+    formData.get(key) ?? '',
+  ).trim()
 }
 
-function num(formData: FormData, key: string) {
+function num(
+  formData: FormData,
+  key: string,
+) {
   return Number(text(formData, key))
 }
 
-function parseQuickQuantities(value: string) {
+function parseQuickQuantities(
+  value: string,
+) {
   return [
     ...new Set(
       value
@@ -33,6 +43,19 @@ function parseQuickQuantities(value: string) {
   ].slice(0, 8)
 }
 
+function votingUrl(
+  editionId: string,
+  params: Record<string, string>,
+) {
+  const search =
+    new URLSearchParams({
+      edition: editionId,
+      ...params,
+    })
+
+  return `/admin/awards/voting?${search.toString()}`
+}
+
 export async function saveVotePricing(
   formData: FormData,
 ) {
@@ -47,12 +70,13 @@ export async function saveVotePricing(
     )
   }
 
-  const { userId } = await requirePermission(
-    'voting.manage',
-    '/admin/awards/voting',
-    'award_edition',
-    awardEditionId,
-  )
+  const { userId } =
+    await requirePermission(
+      'voting.manage',
+      '/admin/awards/voting',
+      'award_edition',
+      awardEditionId,
+    )
 
   const unitPrice = num(
     formData,
@@ -79,7 +103,8 @@ export async function saveVotePricing(
       ),
     )
   const isActive =
-    formData.get('is_active') === 'on'
+    formData.get('is_active') ===
+    'on'
 
   if (
     !Number.isFinite(unitPrice) ||
@@ -90,67 +115,86 @@ export async function saveVotePricing(
     maxQuantity < minQuantity
   ) {
     redirect(
-      '/admin/awards/voting?error=invalid_pricing',
+      votingUrl(awardEditionId, {
+        error: 'invalid_pricing',
+      }),
     )
   }
 
   const admin = createAdminClient()
 
-  const { data: oldData } = await admin
-    .from('vote_pricing')
-    .select('*')
-    .eq(
-      'award_edition_id',
-      awardEditionId,
-    )
-    .maybeSingle()
+  const { data: oldData } =
+    await admin
+      .from('vote_pricing')
+      .select('*')
+      .eq(
+        'award_edition_id',
+        awardEditionId,
+      )
+      .maybeSingle()
 
   const payload = {
-    award_edition_id: awardEditionId,
+    award_edition_id:
+      awardEditionId,
     unit_price: unitPrice,
     currency,
     min_quantity: minQuantity,
     max_quantity: maxQuantity,
-    quick_quantities: quickQuantities,
+    quick_quantities:
+      quickQuantities,
     is_active: isActive,
     updated_by: userId,
     created_by:
       oldData?.created_by ?? userId,
   }
 
-  const { data: newData, error } =
-    await admin
-      .from('vote_pricing')
-      .upsert(payload, {
-        onConflict:
-          'award_edition_id',
-      })
-      .select()
-      .single()
+  const {
+    data: newData,
+    error,
+  } = await admin
+    .from('vote_pricing')
+    .upsert(payload, {
+      onConflict:
+        'award_edition_id',
+    })
+    .select()
+    .single()
 
   if (error || !newData) {
     console.error(
       'saveVotePricing',
       error,
     )
+
     redirect(
-      '/admin/awards/voting?error=save_failed',
+      votingUrl(awardEditionId, {
+        error: 'save_failed',
+      }),
     )
   }
 
-  await admin
-    .from('audit_logs')
-    .insert({
-      actor_user_id: userId,
-      action: oldData
-        ? 'vote_pricing_updated'
-        : 'vote_pricing_created',
-      entity_type: 'vote_pricing',
-      entity_id: newData.id,
-      old_data: oldData ?? null,
-      new_data: newData,
-      metadata: {},
-    })
+  const { error: auditError } =
+    await admin
+      .from('audit_logs')
+      .insert({
+        actor_user_id: userId,
+        action: oldData
+          ? 'vote_pricing_updated'
+          : 'vote_pricing_created',
+        entity_type:
+          'vote_pricing',
+        entity_id: newData.id,
+        old_data: oldData ?? null,
+        new_data: newData,
+        metadata: {},
+      })
+
+  if (auditError) {
+    console.error(
+      'vote pricing audit',
+      auditError,
+    )
+  }
 
   revalidatePath('/admin')
   revalidatePath(
@@ -160,6 +204,8 @@ export async function saveVotePricing(
   revalidatePath('/nominees')
 
   redirect(
-    '/admin/awards/voting?saved=1',
+    votingUrl(awardEditionId, {
+      saved: '1',
+    }),
   )
 }
