@@ -1,14 +1,16 @@
 import { randomUUID } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendTransactionalEmail } from '@/lib/email/resend-rest'
-import { issueTicketsForPaidOrder } from './ticket-issuance'
+import { issueTicketsForOrder } from './ticket-issuance'
 
 function appUrl() {
   const explicit =
     process.env.APP_URL?.trim() ||
     process.env.NEXT_PUBLIC_SITE_URL?.trim()
 
-  if (explicit) return explicit.replace(/\/+$/, '')
+  if (explicit) {
+    return explicit.replace(/\/+$/, '')
+  }
 
   const vercel =
     process.env.VERCEL_PROJECT_PRODUCTION_URL ||
@@ -30,18 +32,44 @@ function esc(value: unknown) {
     .replaceAll("'", '&#039;')
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return 'To be confirmed'
+function formatDate(
+  value?: string | null,
+) {
+  if (!value) {
+    return 'To be confirmed'
+  }
 
-  return new Intl.DateTimeFormat('en-SL', {
-    dateStyle: 'full',
-    timeStyle: 'short',
-    timeZone: 'Africa/Freetown',
-  }).format(new Date(value))
+  return new Intl.DateTimeFormat(
+    'en-SL',
+    {
+      dateStyle: 'full',
+      timeStyle: 'short',
+      timeZone: 'Africa/Freetown',
+    },
+  ).format(new Date(value))
+}
+
+function confirmationCopy(
+  sourceType: string,
+) {
+  switch (sourceType) {
+    case 'free_registration':
+      return 'Your event registration has been confirmed.'
+    case 'invitation':
+      return 'Your invitation has been claimed and your admission is confirmed.'
+    case 'complimentary':
+      return 'A complimentary admission has been issued to you.'
+    default:
+      return 'Payment has been confirmed for your ticket order.'
+  }
 }
 
 function ticketEmailHtml(
-  data: Awaited<ReturnType<typeof issueTicketsForPaidOrder>>,
+  data: Awaited<
+    ReturnType<
+      typeof issueTicketsForOrder
+    >
+  >,
 ) {
   const walletUrl =
     `${appUrl()}/tickets/order/${data.order.public_token}`
@@ -76,9 +104,8 @@ function ticketEmailHtml(
 
       <div style="padding:26px;">
         <p style="margin-top:0;line-height:1.6;">
-          Payment has been confirmed for order
-          <strong>${esc(data.order.order_number)}</strong>.
-          Your individual QR tickets are now available.
+          ${esc(confirmationCopy(data.order.source_type))}
+          Reference <strong>${esc(data.order.order_number)}</strong>.
         </p>
 
         <div style="background:#f6faf8;padding:18px;border-radius:10px;margin:20px 0;">
@@ -109,66 +136,105 @@ function ticketEmailHtml(
 
 export async function deliverTicketOrderEmail(
   ticketOrderId: string,
-  options: { force?: boolean } = {},
+  options: {
+    force?: boolean
+  } = {},
 ) {
-  const admin = createAdminClient()
-  const issuance = await issueTicketsForPaidOrder(ticketOrderId)
+  const admin =
+    createAdminClient()
 
-  const { data: currentOrder } = await admin
-    .from('ticket_orders')
-    .select('id,purchaser_email,delivery_status')
-    .eq('id', ticketOrderId)
-    .maybeSingle()
+  const issuance =
+    await issueTicketsForOrder(
+      ticketOrderId,
+    )
 
-  if (!currentOrder) throw new Error('Ticket order not found.')
+  const { data: currentOrder } =
+    await admin
+      .from('ticket_orders')
+      .select(
+        'id,purchaser_email,delivery_status',
+      )
+      .eq('id', ticketOrderId)
+      .maybeSingle()
 
-  if (
-    currentOrder.delivery_status === 'sent' &&
-    !options.force
-  ) {
-    return { sent: true, skipped: true }
+  if (!currentOrder) {
+    throw new Error(
+      'Ticket order not found.',
+    )
   }
 
-  if (!currentOrder.purchaser_email) {
+  if (
+    currentOrder.delivery_status ===
+      'sent' &&
+    !options.force
+  ) {
+    return {
+      sent: true,
+      skipped: true,
+    }
+  }
+
+  if (
+    !currentOrder.purchaser_email
+  ) {
     await admin
       .from('ticket_orders')
       .update({
-        delivery_status: 'not_available',
+        delivery_status:
+          'not_available',
         delivery_last_error:
           'No purchaser email address was provided.',
       })
       .eq('id', ticketOrderId)
 
-    return { sent: false, skipped: true, reason: 'no_email' }
+    return {
+      sent: false,
+      skipped: true,
+      reason: 'no_email',
+    }
   }
 
   const attemptId = randomUUID()
 
-  await admin.from('ticket_delivery_attempts').insert({
-    id: attemptId,
-    ticket_order_id: ticketOrderId,
-    channel: 'email',
-    recipient: currentOrder.purchaser_email,
-    provider: 'resend',
-    status: 'pending',
-  })
-
-  try {
-    const response = await sendTransactionalEmail({
-      to: currentOrder.purchaser_email,
-      subject: `Your tickets — ${issuance.event.title}`,
-      html: ticketEmailHtml(issuance),
-      idempotencyKey: `ticket-delivery/${attemptId}`,
+  await admin
+    .from(
+      'ticket_delivery_attempts',
+    )
+    .insert({
+      id: attemptId,
+      ticket_order_id:
+        ticketOrderId,
+      channel: 'email',
+      recipient:
+        currentOrder.purchaser_email,
+      provider: 'resend',
+      status: 'pending',
     })
 
-    const now = new Date().toISOString()
+  try {
+    const response =
+      await sendTransactionalEmail({
+        to: currentOrder.purchaser_email,
+        subject: `Your tickets — ${issuance.event.title}`,
+        html: ticketEmailHtml(
+          issuance,
+        ),
+        idempotencyKey:
+          `ticket-delivery/${attemptId}`,
+      })
+
+    const now =
+      new Date().toISOString()
 
     await Promise.all([
       admin
-        .from('ticket_delivery_attempts')
+        .from(
+          'ticket_delivery_attempts',
+        )
         .update({
           status: 'sent',
-          provider_message_id: response.id ?? null,
+          provider_message_id:
+            response.id ?? null,
           completed_at: now,
           error_message: null,
         })
@@ -178,12 +244,17 @@ export async function deliverTicketOrderEmail(
         .update({
           delivery_status: 'sent',
           delivered_at: now,
-          delivery_last_error: null,
+          delivery_last_error:
+            null,
         })
         .eq('id', ticketOrderId),
     ])
 
-    return { sent: true, providerMessageId: response.id ?? null }
+    return {
+      sent: true,
+      providerMessageId:
+        response.id ?? null,
+    }
   } catch (error) {
     const message =
       error instanceof Error
@@ -192,18 +263,23 @@ export async function deliverTicketOrderEmail(
 
     await Promise.all([
       admin
-        .from('ticket_delivery_attempts')
+        .from(
+          'ticket_delivery_attempts',
+        )
         .update({
           status: 'failed',
-          completed_at: new Date().toISOString(),
+          completed_at:
+            new Date().toISOString(),
           error_message: message,
         })
         .eq('id', attemptId),
       admin
         .from('ticket_orders')
         .update({
-          delivery_status: 'failed',
-          delivery_last_error: message,
+          delivery_status:
+            'failed',
+          delivery_last_error:
+            message,
         })
         .eq('id', ticketOrderId),
     ])
