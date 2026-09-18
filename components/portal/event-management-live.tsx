@@ -140,6 +140,12 @@ export async function EventsManagementLivePage({
         <div className="v2-admin-page-actions">
           <Link
             className="button secondary"
+            href="/admin/events/access"
+          >
+            Access & Guests
+          </Link>
+          <Link
+            className="button secondary"
             href="/admin/events/ticket-types"
           >
             Ticket Types

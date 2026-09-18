@@ -174,6 +174,26 @@ export async function PublicEventDetailLivePage({
                     <Ticket size={15} /> Choose tickets
                   </Link>
                 )}
+
+              {data.event.status === 'published' &&
+                data.event.access_type === 'free_registration' &&
+                data.ticketTypes.some(
+                  (type) => type.pricing_type === 'free',
+                ) && (
+                  <Link
+                    className="button light"
+                    href={`/events/${data.event.slug}/register`}
+                  >
+                    <Ticket size={15} /> Register free
+                  </Link>
+                )}
+
+              {data.event.status === 'published' &&
+                data.event.access_type === 'invitation_only' && (
+                  <Pill tone="gold">
+                    Private invitation required
+                  </Pill>
+                )}
             </div>
           </div>
 
@@ -250,6 +270,26 @@ export async function PublicEventDetailLivePage({
                   Select tickets
                 </Link>
               )}
+
+            {data.event.status === 'published' &&
+              data.event.access_type === 'free_registration' &&
+              data.ticketTypes.some(
+                (type) => type.pricing_type === 'free',
+              ) && (
+                <Link
+                  className="button"
+                  href={`/events/${data.event.slug}/register`}
+                >
+                  Register free
+                </Link>
+              )}
+
+            {data.event.access_type === 'invitation_only' && (
+              <p className="live-empty-copy">
+                Access is issued through a private invitation link created by
+                the event team.
+              </p>
+            )}
           </div>
         </section>
       </main>

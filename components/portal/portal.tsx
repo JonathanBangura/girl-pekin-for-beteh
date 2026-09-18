@@ -83,6 +83,7 @@ const adminGroups: readonly NavGroup[] = [
     'EVENTS',
     [
       ['Events', '/admin/events', CalendarDays],
+      ['Access & Guests', '/admin/events/access', UserRound],
       ['Ticket Types', '/admin/events/ticket-types', Ticket],
       ['Orders', '/admin/events/orders', Receipt],
       ['Tickets', '/admin/events/tickets', BadgeCheck],
@@ -150,6 +151,7 @@ function routeLabel(path: string, admin: boolean) {
     '/admin/awards/voting': 'Awards / Voting',
     '/admin/awards/results': 'Awards / Results',
     '/admin/events': 'Events',
+    '/admin/events/access': 'Events / Access & Guests',
     '/admin/events/ticket-types': 'Events / Ticket Types',
     '/admin/events/orders': 'Events / Orders',
     '/admin/events/tickets': 'Events / Tickets',
