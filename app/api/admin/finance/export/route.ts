@@ -27,10 +27,25 @@ function dateEnd(value: string | null) {
     : parsed.toISOString()
 }
 
+function paymentMethod(value: unknown) {
+  if (!value || typeof value !== 'object') return 'unknown'
+  const raw = (value as Record<string, unknown>).payment_method
+  if (raw === 'in-app' || raw === 'momo' || raw === 'card') {
+    return raw
+  }
+  return 'unknown'
+}
+
+function paymentMethodLabel(value: string) {
+  if (value === 'in-app') return 'Vult App'
+  if (value === 'momo') return 'Mobile Money'
+  if (value === 'card') return 'Card'
+  return 'Unknown'
+}
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
-  const { data: claimsData } =
-    await supabase.auth.getClaims()
+  const { data: claimsData } = await supabase.auth.getClaims()
 
   if (!claimsData?.claims?.sub) {
     return NextResponse.json(
@@ -39,12 +54,14 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const { data: allowed, error: permissionError } =
-    await supabase.rpc('has_permission', {
+  const { data: allowed, error: permissionError } = await supabase.rpc(
+    'has_permission',
+    {
       requested_permission_code: 'finance.manage',
       requested_scope_type: null,
       requested_scope_id: null,
-    })
+    },
+  )
 
   if (permissionError || allowed !== true) {
     return NextResponse.json(
@@ -53,45 +70,66 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const report =
-    request.nextUrl.searchParams.get('report') ?? ''
-  const from = dateStart(
-    request.nextUrl.searchParams.get('from'),
-  )
-  const to = dateEnd(
-    request.nextUrl.searchParams.get('to'),
-  )
+  const report = request.nextUrl.searchParams.get('report') ?? ''
+  const from = dateStart(request.nextUrl.searchParams.get('from'))
+  const to = dateEnd(request.nextUrl.searchParams.get('to'))
 
   const admin = createAdminClient()
+  const pageSize = 1000
   let content = ''
   let filename = ''
 
   if (report === 'payments') {
-    let query = admin
-      .from('payments')
-      .select(
-        'id,payment_type,provider,provider_transaction_id,amount,currency,status,payer_name,payer_email,payer_phone,paid_at,created_at,vote_order_id,ticket_order_id',
-      )
-      .in('status', [
-        'succeeded',
-        'refunded',
-        'partially_refunded',
-        'reversed',
-      ])
-      .not('paid_at', 'is', null)
-      .order('paid_at', { ascending: false })
+    const rows: Array<{
+      id: string
+      payment_type: string
+      provider: string
+      provider_transaction_id: string | null
+      amount: number | string
+      currency: string
+      status: string
+      payer_name: string | null
+      payer_email: string | null
+      payer_phone: string | null
+      paid_at: string | null
+      created_at: string
+      vote_order_id: string | null
+      ticket_order_id: string | null
+      provider_payload: Record<string, unknown> | null
+    }> = []
 
-    if (from) query = query.gte('paid_at', from)
-    if (to) query = query.lte('paid_at', to)
+    for (let offset = 0; ; offset += pageSize) {
+      let query = admin
+        .from('payments')
+        .select(
+          'id,payment_type,provider,provider_transaction_id,amount,currency,status,payer_name,payer_email,payer_phone,paid_at,created_at,vote_order_id,ticket_order_id,provider_payload',
+        )
+        .in('status', [
+          'succeeded',
+          'refunded',
+          'partially_refunded',
+          'reversed',
+        ])
+        .not('paid_at', 'is', null)
+        .order('paid_at', { ascending: false })
+        .range(offset, offset + pageSize - 1)
 
-    const { data, error } = await query
+      if (from) query = query.gte('paid_at', from)
+      if (to) query = query.lte('paid_at', to)
 
-    if (error) {
-      console.error('payments export', error)
-      return NextResponse.json(
-        { error: 'Unable to export payments.' },
-        { status: 500 },
-      )
+      const { data, error } = await query
+
+      if (error) {
+        console.error('payments export', error)
+        return NextResponse.json(
+          { error: 'Unable to export payments.' },
+          { status: 500 },
+        )
+      }
+
+      const batch = data ?? []
+      rows.push(...batch)
+      if (batch.length < pageSize) break
     }
 
     content = csv([
@@ -99,6 +137,7 @@ export async function GET(request: NextRequest) {
         'Payment ID',
         'Type',
         'Provider',
+        'Payment Method',
         'Provider Transaction ID',
         'Amount',
         'Currency',
@@ -111,10 +150,11 @@ export async function GET(request: NextRequest) {
         'Vote Order ID',
         'Ticket Order ID',
       ],
-      ...(data ?? []).map((row) => [
+      ...rows.map((row) => [
         row.id,
         row.payment_type,
         row.provider,
+        paymentMethodLabel(paymentMethod(row.provider_payload)),
         row.provider_transaction_id,
         row.amount,
         row.currency,
@@ -130,25 +170,47 @@ export async function GET(request: NextRequest) {
     ])
     filename = 'gpfb-payments.csv'
   } else if (report === 'refunds') {
-    let query = admin
-      .from('refunds')
-      .select(
-        'id,payment_id,amount,status,refund_kind,provider_refund_id,external_method,reason,notes,processed_at,provider_confirmed_at,created_at',
-      )
-      .eq('status', 'succeeded')
-      .order('processed_at', { ascending: false })
+    const rows: Array<{
+      id: string
+      payment_id: string
+      amount: number | string
+      status: string
+      refund_kind: string | null
+      provider_refund_id: string | null
+      external_method: string | null
+      reason: string
+      notes: string | null
+      processed_at: string | null
+      provider_confirmed_at: string | null
+      created_at: string
+    }> = []
 
-    if (from) query = query.gte('processed_at', from)
-    if (to) query = query.lte('processed_at', to)
+    for (let offset = 0; ; offset += pageSize) {
+      let query = admin
+        .from('refunds')
+        .select(
+          'id,payment_id,amount,status,refund_kind,provider_refund_id,external_method,reason,notes,processed_at,provider_confirmed_at,created_at',
+        )
+        .eq('status', 'succeeded')
+        .order('processed_at', { ascending: false })
+        .range(offset, offset + pageSize - 1)
 
-    const { data, error } = await query
+      if (from) query = query.gte('processed_at', from)
+      if (to) query = query.lte('processed_at', to)
 
-    if (error) {
-      console.error('refund export', error)
-      return NextResponse.json(
-        { error: 'Unable to export refunds.' },
-        { status: 500 },
-      )
+      const { data, error } = await query
+
+      if (error) {
+        console.error('refund export', error)
+        return NextResponse.json(
+          { error: 'Unable to export refunds.' },
+          { status: 500 },
+        )
+      }
+
+      const batch = data ?? []
+      rows.push(...batch)
+      if (batch.length < pageSize) break
     }
 
     content = csv([
@@ -166,7 +228,7 @@ export async function GET(request: NextRequest) {
         'Provider Confirmed At',
         'Created At',
       ],
-      ...(data ?? []).map((row) => [
+      ...rows.map((row) => [
         row.id,
         row.payment_id,
         row.amount,

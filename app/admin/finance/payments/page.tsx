@@ -5,7 +5,9 @@ type PageProps = {
     status?: string
     type?: string
     provider?: string
+    method?: string
     q?: string
+    page?: string
   }>
 }
 

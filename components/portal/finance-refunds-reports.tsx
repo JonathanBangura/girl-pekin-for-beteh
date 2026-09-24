@@ -34,6 +34,13 @@ function humanize(value?: string | null) {
     )
 }
 
+function paymentMethodLabel(value?: string | null) {
+  if (value === 'in-app') return 'Vult App'
+  if (value === 'momo') return 'Mobile Money'
+  if (value === 'card') return 'Card'
+  return 'Unknown'
+}
+
 function RefundNotice({
   recorded,
   error,
@@ -481,6 +488,52 @@ export async function FinanceReportsLivePage({
                   <td colSpan={3}>
                     <div className="live-empty-state compact">
                       <strong>No report rows.</strong>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+            <section className="panel v2-admin-table-panel">
+        <div className="v2-admin-table-toolbar">
+          <div>
+            <h2>Collections by payment method</h2>
+            <span className="live-data-badge">
+              VULT APP · MOBILE MONEY · CARD
+            </span>
+          </div>
+        </div>
+
+        <div className="live-table-wrap mobile-table-wrap">
+          <table className="live-admin-table">
+            <thead>
+              <tr>
+                <th>Payment method</th>
+                <th>Paid records</th>
+                <th>Gross collected</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.byMethod.map((row) => (
+                <tr
+                  key={`${row.payment_method}:${row.currency}`}
+                >
+                  <td>
+                    {paymentMethodLabel(row.payment_method)}
+                  </td>
+                  <td>{row.count}</td>
+                  <td>{money(row.amount, row.currency)}</td>
+                </tr>
+              ))}
+
+              {!data.byMethod.length && (
+                <tr>
+                  <td colSpan={3}>
+                    <div className="live-empty-state compact">
+                      <strong>No payment-method report rows.</strong>
                     </div>
                   </td>
                 </tr>

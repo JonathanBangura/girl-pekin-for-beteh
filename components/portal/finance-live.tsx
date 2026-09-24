@@ -38,6 +38,13 @@ function humanize(value?: string | null) {
     )
 }
 
+function paymentMethodLabel(value?: string | null) {
+  if (value === 'in-app') return 'Vult App'
+  if (value === 'momo') return 'Mobile Money'
+  if (value === 'card') return 'Card'
+  return 'Unknown'
+}
+
 function StatusBadge({
   value,
 }: {
@@ -210,6 +217,38 @@ export async function FinanceOverviewLivePage() {
         )}
       </section>
 
+      <section className="panel">
+        <div className="v2-card-head">
+          <div>
+            <span className="v2-admin-eyebrow">
+              Payment methods
+            </span>
+            <h2>Successful collections by method</h2>
+          </div>
+        </div>
+
+        {data.methodBreakdown.length ? (
+          <div className="v2-admin-stats mobile-admin-stats">
+            {data.methodBreakdown.map((row) => (
+              <article
+                key={`${row.payment_method}:${row.currency}`}
+              >
+                <span>{paymentMethodLabel(row.payment_method)}</span>
+                <strong>{money(row.amount, row.currency)}</strong>
+                <small>
+                  {row.count.toLocaleString()} successful payment(s) ·{' '}
+                  {row.currency}
+                </small>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="live-empty-state compact">
+            <strong>No successful payment-method activity yet.</strong>
+          </div>
+        )}
+      </section>
+
       {(data.unresolvedEventCount > 0 ||
         data.stalePaymentCount > 0) && (
         <section className="panel">
@@ -277,7 +316,7 @@ export async function FinanceOverviewLivePage() {
                   </td>
                   <td>{humanize(payment.provider)}</td>
                   <td>
-                    {humanize(payment.payment_method)}
+                    {paymentMethodLabel(payment.payment_method)}
                   </td>
                   <td>
                     {money(
@@ -309,14 +348,41 @@ export async function FinanceOverviewLivePage() {
   )
 }
 
-export async function FinancePaymentsLivePage({
-  filters,
-}: {
+function financePaymentsHref(
   filters: {
     status?: string
     type?: string
     provider?: string
+    method?: string
     q?: string
+    page?: string
+  },
+  page: number,
+) {
+  const params = new URLSearchParams()
+
+  if (filters.q) params.set('q', filters.q)
+  if (filters.type) params.set('type', filters.type)
+  if (filters.status) params.set('status', filters.status)
+  if (filters.provider) params.set('provider', filters.provider)
+  if (filters.method) params.set('method', filters.method)
+  if (page > 1) params.set('page', String(page))
+
+  const query = params.toString()
+  return query
+    ? `/admin/finance/payments?${query}`
+    : '/admin/finance/payments'
+
+export async function FinancePaymentsLivePage({
+  filters,
+}: {
+  filters: {
+        status?: string
+    type?: string
+    provider?: string
+    method?: string
+    q?: string
+    page?: string
   }
 }) {
   const data = await getFinancePaymentsData(filters)
@@ -391,6 +457,20 @@ export async function FinancePaymentsLivePage({
           </select>
         </label>
 
+       <label>
+          Payment method
+          <select
+            name="method"
+            defaultValue={filters.method ?? ''}
+          >
+            <option value="">All methods</option>
+            <option value="in-app">Vult App</option>
+            <option value="momo">Mobile Money</option>
+            <option value="card">Card</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </label>
+
         <label>
           Provider
           <select
@@ -424,7 +504,7 @@ export async function FinancePaymentsLivePage({
           <div>
             <h2>Payment records</h2>
             <span className="live-data-badge">
-              {data.payments.length} RESULTS
+              {data.totalCount} RESULTS
             </span>
           </div>
         </div>
@@ -463,7 +543,7 @@ export async function FinancePaymentsLivePage({
                   </td>
                   <td>{humanize(payment.provider)}</td>
                   <td>
-                    {humanize(payment.payment_method)}
+                    {paymentMethodLabel(payment.payment_method)}
                   </td>
                   <td>
                     <strong>
@@ -512,6 +592,32 @@ export async function FinancePaymentsLivePage({
             </tbody>
           </table>
         </div>
+
+        {data.totalPages > 1 ? (
+          <div className="v2-admin-page-actions">
+            {data.page > 1 ? (
+              <Link
+                className="button secondary"
+                href={financePaymentsHref(filters, data.page - 1)}
+              >
+                Previous
+              </Link>
+            ) : null}
+
+            <span className="live-data-badge">
+              PAGE {data.page} OF {data.totalPages}
+            </span>
+
+            {data.page < data.totalPages ? (
+              <Link
+                className="button secondary"
+                href={financePaymentsHref(filters, data.page + 1)}
+              >
+                Next
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
       </section>
     </div>
   )

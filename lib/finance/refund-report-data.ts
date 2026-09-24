@@ -160,137 +160,99 @@ export async function getFinanceReportsData(filters: {
   )
 
   const admin = createAdminClient()
-
-  let paymentQuery = admin
-    .from('payments')
-    .select(
-      'id,payment_type,provider,amount,currency,status,paid_at,created_at',
-    )
-    .in('status', [
-      'succeeded',
-      'refunded',
-      'partially_refunded',
-      'reversed',
-    ])
-    .not('paid_at', 'is', null)
-    .order('paid_at', { ascending: false })
-
   const from = isoDateStart(filters.from)
   const to = isoDateEnd(filters.to)
 
-  if (from) paymentQuery = paymentQuery.gte('paid_at', from)
-  if (to) paymentQuery = paymentQuery.lte('paid_at', to)
+  const { data, error } = await admin.rpc('finance_report_summary', {
+    p_from: from,
+    p_to: to,
+  })
 
-  let refundQuery = admin
-    .from('refunds')
-    .select(
-      'id,payment_id,amount,status,refund_kind,processed_at,created_at',
-    )
-    .eq('status', 'succeeded')
-    .order('processed_at', { ascending: false })
-
-  if (from) refundQuery = refundQuery.gte('processed_at', from)
-  if (to) refundQuery = refundQuery.lte('processed_at', to)
-
-  const [
-    { data: payments, error: paymentsError },
-    { data: refunds, error: refundsError },
-  ] = await Promise.all([paymentQuery, refundQuery])
-
-  if (paymentsError) {
-    console.error('finance reports payments', paymentsError)
-    throw new Error('Unable to load report payments.')
+  if (error) {
+    console.error('finance report summary', error)
+    throw new Error('Unable to load finance reports.')
   }
 
-  if (refundsError) {
-    console.error('finance reports refunds', refundsError)
-    throw new Error('Unable to load report refunds.')
+  type ReportRow = {
+    payment_count: number | string
+    refund_count: number | string
+    by_currency: unknown
+    by_type: unknown
+    by_method: unknown
+    recent_refunds: unknown
   }
 
-  const paymentMap = new Map(
-    (payments ?? []).map((payment) => [
-      payment.id,
-      payment,
-    ]),
-  )
+  const report = (data?.[0] ?? null) as ReportRow | null
 
-  const byCurrency = new Map<
-    string,
-    { gross: number; refunds: number; net: number }
-  >()
+  const byCurrency = Array.isArray(report?.by_currency)
+    ? report.by_currency.map((row) => {
+        const item = row as Record<string, unknown>
+        return {
+          currency: String(item.currency ?? 'SLE'),
+          gross: toNumber(item.gross),
+          refunds: toNumber(item.refunds),
+          net: toNumber(item.net),
+        }
+      })
+    : []
 
-  const byType = new Map<
-    string,
-    {
-      payment_type: string
-      currency: string
-      count: number
-      amount: number
-    }
-  >()
+  const byType = Array.isArray(report?.by_type)
+    ? report.by_type.map((row) => {
+        const item = row as Record<string, unknown>
+        return {
+          payment_type: String(item.payment_type ?? 'unknown'),
+          currency: String(item.currency ?? 'SLE'),
+          count: toNumber(item.count),
+          amount: toNumber(item.amount),
+        }
+      })
+    : []
 
-  for (const payment of payments ?? []) {
-    const currency = payment.currency
-    const amount = toNumber(payment.amount)
+  const byMethod = Array.isArray(report?.by_method)
+    ? report.by_method.map((row) => {
+        const item = row as Record<string, unknown>
+        const rawMethod = String(item.payment_method ?? 'unknown')
+        return {
+          payment_method:
+            rawMethod === 'in-app' || rawMethod === 'momo' || rawMethod === 'card'
+              ? rawMethod
+              : 'unknown',
+          currency: String(item.currency ?? 'SLE'),
+          count: toNumber(item.count),
+          amount: toNumber(item.amount),
+        }
+      })
+    : []
 
-    const current =
-      byCurrency.get(currency) ??
-      { gross: 0, refunds: 0, net: 0 }
-
-    current.gross += amount
-    current.net += amount
-    byCurrency.set(currency, current)
-
-    const typeKey =
-      `${payment.payment_type}:${payment.currency}`
-    const type =
-      byType.get(typeKey) ?? {
-        payment_type: payment.payment_type,
-        currency: payment.currency,
-        count: 0,
-        amount: 0,
-      }
-
-    type.count += 1
-    type.amount += amount
-    byType.set(typeKey, type)
-  }
-
-  for (const refund of refunds ?? []) {
-    const payment = paymentMap.get(refund.payment_id)
-    if (!payment) continue
-
-    const amount = toNumber(refund.amount)
-    const current =
-      byCurrency.get(payment.currency) ??
-      { gross: 0, refunds: 0, net: 0 }
-
-    current.refunds += amount
-    current.net -= amount
-    byCurrency.set(payment.currency, current)
-  }
+  const recentRefunds = Array.isArray(report?.recent_refunds)
+    ? report.recent_refunds.map((row) => {
+        const item = row as Record<string, unknown>
+        return {
+          id: String(item.id ?? ''),
+          payment_id: String(item.payment_id ?? ''),
+          amount: toNumber(item.amount),
+          status: String(item.status ?? ''),
+          refund_kind: String(item.refund_kind ?? ''),
+          processed_at:
+            typeof item.processed_at === 'string'
+              ? item.processed_at
+              : null,
+          created_at: String(item.created_at ?? ''),
+          currency: String(item.currency ?? 'SLE'),
+          payment_type: String(item.payment_type ?? '—'),
+          provider: String(item.provider ?? '—'),
+        }
+      })
+    : []
 
   return {
     from: filters.from ?? '',
     to: filters.to ?? '',
-    paymentCount: (payments ?? []).length,
-    refundCount: (refunds ?? []).length,
-    byCurrency: [...byCurrency.entries()].map(
-      ([currency, totals]) => ({
-        currency,
-        ...totals,
-      }),
-    ),
-    byType: [...byType.values()],
-    recentRefunds: (refunds ?? []).slice(0, 10).map((refund) => {
-      const payment = paymentMap.get(refund.payment_id)
-
-      return {
-        ...refund,
-        currency: payment?.currency ?? 'SLE',
-        payment_type: payment?.payment_type ?? '—',
-        provider: payment?.provider ?? '—',
-      }
-    }),
+    paymentCount: toNumber(report?.payment_count),
+    refundCount: toNumber(report?.refund_count),
+    byCurrency,
+    byType,
+    byMethod,
+    recentRefunds,
   }
 }

@@ -28,9 +28,14 @@ function toNumber(value: unknown) {
 
 function paymentMethod(payment: PaymentRow) {
   const payload = payment.provider_payload
-  if (!payload || typeof payload !== 'object') return null
+  if (!payload || typeof payload !== 'object') return 'unknown'
+
   const value = payload.payment_method
-  return typeof value === 'string' ? value : null
+  if (value === 'in-app' || value === 'momo' || value === 'card') {
+    return value
+  }
+
+  return 'unknown'
 }
 
 function isOlderThan(value: string, minutes: number) {
@@ -140,77 +145,67 @@ export async function getFinanceOverviewData() {
   await requirePermission('finance.manage', '/admin/finance')
 
   const admin = createAdminClient()
-  const payments = await getPaymentRows(500)
-
-  const [
-    { data: paymentEvents, error: paymentEventsError },
-    { data: refunds, error: refundsError },
-  ] = await Promise.all([
-    admin
-      .from('payment_events')
-      .select(
-        'id,provider,provider_event_id,payment_id,event_type,processed_at,processing_error,received_at',
-      )
-      .order('received_at', { ascending: false })
-      .limit(500),
-    admin
-      .from('refunds')
-      .select('id,payment_id,amount,status,created_at')
-      .order('created_at', { ascending: false })
-      .limit(500),
+  const [summaryResult, recentPayments] = await Promise.all([
+    admin.rpc('finance_overview_summary'),
+    getPaymentRows(12),
   ])
 
-  if (paymentEventsError) {
-    console.error('finance payment events', paymentEventsError)
-    throw new Error('Unable to load payment events.')
+  if (summaryResult.error) {
+    console.error('finance overview summary', summaryResult.error)
+    throw new Error('Unable to load finance overview.')
   }
 
-  if (refundsError) {
-    console.error('finance refunds', refundsError)
-    throw new Error('Unable to load refunds.')
+  type SummaryRow = {
+    succeeded_count: number | string
+    pending_count: number | string
+    failed_count: number | string
+    stale_payment_count: number | string
+    unresolved_event_count: number | string
+    refund_count: number | string
+    volume_by_currency: unknown
+    method_breakdown: unknown
   }
 
-  const succeeded = payments.filter(
-    (payment) => payment.status === 'succeeded',
-  )
+  const summary = (summaryResult.data?.[0] ?? null) as SummaryRow | null
+  const enriched = await enrichPayments(recentPayments)
 
-  const volumeMap = new Map<string, number>()
-  for (const payment of succeeded) {
-    volumeMap.set(
-      payment.currency,
-      (volumeMap.get(payment.currency) ?? 0) +
-        toNumber(payment.amount),
-    )
-  }
+  const volumeByCurrency = Array.isArray(summary?.volume_by_currency)
+    ? summary.volume_by_currency.map((row) => {
+        const item = row as Record<string, unknown>
+        return {
+          currency: String(item.currency ?? 'SLE'),
+          amount: toNumber(item.amount),
+        }
+      })
+    : []
 
-  const unresolvedEvents = (paymentEvents ?? []).filter(
-    (event) =>
-      !event.processed_at ||
-      Boolean(event.processing_error),
-  )
+  const methodBreakdown = Array.isArray(summary?.method_breakdown)
+    ? summary.method_breakdown.map((row) => {
+        const item = row as Record<string, unknown>
+        const rawMethod = String(item.payment_method ?? 'unknown')
+        const paymentMethod =
+          rawMethod === 'in-app' || rawMethod === 'momo' || rawMethod === 'card'
+            ? rawMethod
+            : 'unknown'
 
-  const stalePayments = payments.filter(
-    (payment) =>
-      ['pending', 'processing'].includes(payment.status) &&
-      isOlderThan(payment.created_at, 30),
-  )
-
-  const enriched = await enrichPayments(payments.slice(0, 12))
+        return {
+          payment_method: paymentMethod,
+          currency: String(item.currency ?? 'SLE'),
+          count: toNumber(item.count),
+          amount: toNumber(item.amount),
+        }
+      })
+    : []
 
   return {
-    succeededCount: succeeded.length,
-    pendingCount: payments.filter((payment) =>
-      ['pending', 'processing'].includes(payment.status),
-    ).length,
-    failedCount: payments.filter(
-      (payment) => payment.status === 'failed',
-    ).length,
-    unresolvedEventCount: unresolvedEvents.length,
-    stalePaymentCount: stalePayments.length,
-    refundCount: (refunds ?? []).length,
-    volumeByCurrency: [...volumeMap.entries()]
-      .map(([currency, amount]) => ({ currency, amount }))
-      .sort((a, b) => a.currency.localeCompare(b.currency)),
+    succeededCount: toNumber(summary?.succeeded_count),
+    pendingCount: toNumber(summary?.pending_count),
+    failedCount: toNumber(summary?.failed_count),
+    unresolvedEventCount: toNumber(summary?.unresolved_event_count),
+    stalePaymentCount: toNumber(summary?.stale_payment_count),
+    refundCount: toNumber(summary?.refund_count),
+    volumeByCurrency,
+    methodBreakdown,
     recentPayments: enriched,
   }
 }
@@ -219,7 +214,9 @@ export async function getFinancePaymentsData(filters: {
   status?: string
   type?: string
   provider?: string
+  method?: string
   q?: string
+  page?: string
 }) {
   await requirePermission(
     'finance.manage',
@@ -237,54 +234,91 @@ export async function getFinancePaymentsData(filters: {
     'reversed',
   ])
   const validTypes = new Set(['vote', 'ticket', 'donation'])
+  const validMethods = new Set(['in-app', 'momo', 'card', 'unknown'])
 
-  const allRows = await getPaymentRows(750)
-  let rows = allRows
+  const page = Math.max(
+    1,
+    Number.parseInt(filters.page ?? '1', 10) || 1,
+  )
+  const pageSize = 50
+  const admin = createAdminClient()
 
-  if (filters.status && validStatuses.has(filters.status)) {
-    rows = rows.filter(
-      (payment) => payment.status === filters.status,
-    )
+  const status =
+    filters.status && validStatuses.has(filters.status)
+      ? filters.status
+      : null
+  const type =
+    filters.type && validTypes.has(filters.type)
+      ? filters.type
+      : null
+  const method =
+    filters.method && validMethods.has(filters.method)
+      ? filters.method
+      : null
+  const provider = filters.provider?.trim() || null
+  const q = filters.q?.trim() || null
+
+  const [paymentsResult, optionsResult] = await Promise.all([
+    admin.rpc('finance_payments_page', {
+      p_status: status,
+      p_type: type,
+      p_provider: provider,
+      p_method: method,
+      p_query: q,
+      p_page: page,
+      p_page_size: pageSize,
+    }),
+    admin.rpc('finance_payment_filter_options'),
+  ])
+
+  if (paymentsResult.error) {
+    console.error('finance paginated payments', paymentsResult.error)
+    throw new Error('Unable to load payments.')
   }
 
-  if (filters.type && validTypes.has(filters.type)) {
-    rows = rows.filter(
-      (payment) => payment.payment_type === filters.type,
-    )
+  if (optionsResult.error) {
+    console.error('finance payment filter options', optionsResult.error)
+    throw new Error('Unable to load payment filter options.')
   }
 
-  if (filters.provider) {
-    const provider = filters.provider.toLowerCase()
-    rows = rows.filter(
-      (payment) =>
-        payment.provider.toLowerCase() === provider,
-    )
+  type RpcPaymentRow = PaymentRow & {
+    payment_method: string
+    order_number: string
+    order_status: string | null
+    delivery_status: string | null
+    delivery_last_error: string | null
+    total_count: number | string
   }
 
-  const enriched = await enrichPayments(rows)
+  const rpcRows = (paymentsResult.data ?? []) as RpcPaymentRow[]
+  const totalCount = toNumber(rpcRows[0]?.total_count)
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
 
-  const q = filters.q?.trim().toLowerCase()
-  const filtered = q
-    ? enriched.filter((payment) =>
-        [
-          payment.id,
-          payment.order_number,
-          payment.provider_transaction_id ?? '',
-          payment.payer_name ?? '',
-          payment.payer_email ?? '',
-          payment.payer_phone ?? '',
-        ]
-          .join(' ')
-          .toLowerCase()
-          .includes(q),
-      )
-    : enriched
+  const payments = rpcRows.map((payment) => ({
+    ...payment,
+    amount_number: toNumber(payment.amount),
+    payment_method:
+      payment.payment_method === 'in-app' ||
+      payment.payment_method === 'momo' ||
+      payment.payment_method === 'card'
+        ? payment.payment_method
+        : 'unknown',
+  }))
+
+  const rawProviders = (
+    optionsResult.data?.[0] as { providers?: unknown } | undefined
+  )?.providers
+  const providers = Array.isArray(rawProviders)
+    ? rawProviders.map((value) => String(value)).filter(Boolean)
+    : []
 
   return {
-    payments: filtered,
-    providers: [
-      ...new Set(allRows.map((payment) => payment.provider)),
-    ].sort(),
+    payments,
+    providers,
+    totalCount,
+    page,
+    pageSize,
+    totalPages,
   }
 }
 

@@ -284,7 +284,7 @@ text = replace_once(
     path,
 )
 text = text.replace(
-    "{humanize(payment.payment_method)}",
+    "{paymentMethodLabel(payment.payment_method)}",
     "{paymentMethodLabel(payment.payment_method)}",
 )
 
@@ -380,7 +380,7 @@ provider_label = """        <label>\n          Provider\n          <select"""
 method_filter = """        <label>\n          Payment method\n          <select\n            name=\"method\"\n            defaultValue={filters.method ?? ''}\n          >\n            <option value=\"\">All methods</option>\n            <option value=\"in-app\">Vult App</option>\n            <option value=\"momo\">Mobile Money</option>\n            <option value=\"card\">Card</option>\n            <option value=\"unknown\">Unknown</option>\n          </select>\n        </label>\n\n"""
 text = replace_once(text, provider_label, method_filter + provider_label, path)
 text = text.replace(
-    "{data.payments.length} RESULTS",
+    "{data.totalCount} RESULTS",
     "{data.totalCount} RESULTS",
     1,
 )
