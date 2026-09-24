@@ -349,10 +349,11 @@ href_helper = r'''function financePaymentsHref(
   if (filters.method) params.set('method', filters.method)
   if (page > 1) params.set('page', String(page))
 
-  const query = params.toString()
+const query = params.toString()
   return query
     ? `/admin/finance/payments?${query}`
     : '/admin/finance/payments'
+}
 }
 
 '''
