@@ -22,131 +22,189 @@ function isoDateEnd(value?: string) {
     : date.toISOString()
 }
 
-export async function getRefundManagementData() {
+export async function getRefundManagementData(
+  filters: {
+    payment_q?: string
+    refund_page?: string
+  } = {},
+) {
   await requirePermission(
     'finance.manage',
     '/admin/finance/refunds',
   )
 
+  const paymentQuery = filters.payment_q?.trim() ?? ''
+  const refundPage = Math.max(
+    1,
+    Number.parseInt(filters.refund_page ?? '1', 10) || 1,
+  )
+  const refundPageSize = 50
+  const paymentLimit = 25
   const admin = createAdminClient()
 
-  const [
-    paymentsResult,
-    refundsResult,
-    voteOrdersResult,
-    ticketOrdersResult,
-  ] = await Promise.all([
-    admin
-      .from('payments')
-      .select(
-        'id,payment_type,vote_order_id,ticket_order_id,provider,provider_transaction_id,amount,currency,status,payer_name,payer_email,payer_phone,paid_at,created_at',
-      )
-      .order('created_at', { ascending: false })
-      .limit(500),
-    admin
-      .from('refunds')
-      .select(
-        'id,payment_id,amount,reason,provider_refund_id,status,requested_by,processed_at,created_at,refund_kind,external_method,notes,completed_by,provider_confirmed_at',
-      )
-      .order('created_at', { ascending: false })
-      .limit(250),
-    admin
-      .from('vote_orders')
-      .select('id,order_number,status'),
-    admin
-      .from('ticket_orders')
-      .select('id,order_number,status'),
-  ])
-
-  for (const [label, result] of [
-    ['payments', paymentsResult],
-    ['refunds', refundsResult],
-    ['vote orders', voteOrdersResult],
-    ['ticket orders', ticketOrdersResult],
-  ] as const) {
-    if (result.error) {
-      console.error(`refund management ${label}`, result.error)
-      throw new Error(`Unable to load ${label}.`)
-    }
-  }
-
-  const voteMap = new Map(
-    (voteOrdersResult.data ?? []).map((order) => [
-      order.id,
-      order,
-    ]),
-  )
-  const ticketMap = new Map(
-    (ticketOrdersResult.data ?? []).map((order) => [
-      order.id,
-      order,
-    ]),
-  )
-
-  const paymentIdsWithSuccessfulRefund = new Set(
-    (refundsResult.data ?? [])
-      .filter((refund) => refund.status === 'succeeded')
-      .map((refund) => refund.payment_id),
-  )
-
-  const eligiblePayments = (paymentsResult.data ?? [])
-    .filter(
-      (payment) =>
-        payment.status === 'succeeded' &&
-        !paymentIdsWithSuccessfulRefund.has(payment.id),
-    )
-    .map((payment) => {
-      const order =
-        payment.vote_order_id
-          ? voteMap.get(payment.vote_order_id)
-          : payment.ticket_order_id
-            ? ticketMap.get(payment.ticket_order_id)
-            : null
-
-      return {
-        ...payment,
-        amount_number: toNumber(payment.amount),
-        order_number: order?.order_number ?? '—',
-        order_status: order?.status ?? null,
-      }
-    })
-    .filter((payment) => {
-      if (payment.payment_type === 'donation') return true
-      return payment.order_status === 'paid'
-    })
-
-  const paymentMap = new Map(
-    (paymentsResult.data ?? []).map((payment) => [
-      payment.id,
-      payment,
-    ]),
-  )
-
-  const refunds = (refundsResult.data ?? []).map(
-    (refund) => {
-      const payment = paymentMap.get(refund.payment_id)
-      const order =
-        payment?.vote_order_id
-          ? voteMap.get(payment.vote_order_id)
-          : payment?.ticket_order_id
-            ? ticketMap.get(payment.ticket_order_id)
-            : null
-
-      return {
-        ...refund,
-        amount_number: toNumber(refund.amount),
-        payment_type: payment?.payment_type ?? '—',
-        provider: payment?.provider ?? '—',
-        currency: payment?.currency ?? 'SLE',
-        payer_name: payment?.payer_name ?? null,
-        order_number: order?.order_number ?? '—',
-      }
+  const { data, error } = await admin.rpc(
+    'finance_refund_management_page',
+    {
+      p_payment_query: paymentQuery || null,
+      p_refund_page: refundPage,
+      p_refund_page_size: refundPageSize,
+      p_payment_limit: paymentLimit,
     },
   )
 
+  if (error) {
+    console.error('refund management page', error)
+    throw new Error('Unable to load refund management.')
+  }
+
+  type RefundManagementRpcRow = {
+    eligible_payment_count: number | string
+    eligible_payments: unknown
+    refund_count: number | string
+    refund_page: number | string
+    refund_page_size: number | string
+    refunds: unknown
+  }
+
+  const result =
+    (data?.[0] ?? null) as RefundManagementRpcRow | null
+
+  const eligiblePayments = Array.isArray(
+    result?.eligible_payments,
+  )
+    ? result.eligible_payments.map((row) => {
+        const item = row as Record<string, unknown>
+        return {
+          id: String(item.id ?? ''),
+          payment_type: String(
+            item.payment_type ?? '—',
+          ),
+          provider: String(item.provider ?? '—'),
+          provider_transaction_id:
+            typeof item.provider_transaction_id === 'string'
+              ? item.provider_transaction_id
+              : null,
+          amount: item.amount,
+          amount_number: toNumber(item.amount),
+          currency: String(item.currency ?? 'SLE'),
+          status: String(item.status ?? ''),
+          payer_name:
+            typeof item.payer_name === 'string'
+              ? item.payer_name
+              : null,
+          payer_email:
+            typeof item.payer_email === 'string'
+              ? item.payer_email
+              : null,
+          payer_phone:
+            typeof item.payer_phone === 'string'
+              ? item.payer_phone
+              : null,
+          paid_at:
+            typeof item.paid_at === 'string'
+              ? item.paid_at
+              : null,
+          created_at: String(item.created_at ?? ''),
+          order_number: String(
+            item.order_number ?? '—',
+          ),
+          order_status:
+            typeof item.order_status === 'string'
+              ? item.order_status
+              : null,
+          payment_method: String(
+            item.payment_method ?? 'unknown',
+          ),
+        }
+      })
+    : []
+
+  const refunds = Array.isArray(result?.refunds)
+    ? result.refunds.map((row) => {
+        const item = row as Record<string, unknown>
+        return {
+          id: String(item.id ?? ''),
+          payment_id: String(item.payment_id ?? ''),
+          amount: item.amount,
+          amount_number: toNumber(item.amount),
+          reason: String(item.reason ?? ''),
+          provider_refund_id:
+            typeof item.provider_refund_id === 'string'
+              ? item.provider_refund_id
+              : null,
+          status: String(item.status ?? ''),
+          requested_by:
+            typeof item.requested_by === 'string'
+              ? item.requested_by
+              : null,
+          processed_at:
+            typeof item.processed_at === 'string'
+              ? item.processed_at
+              : null,
+          created_at: String(item.created_at ?? ''),
+          refund_kind:
+            typeof item.refund_kind === 'string'
+              ? item.refund_kind
+              : null,
+          external_method:
+            typeof item.external_method === 'string'
+              ? item.external_method
+              : null,
+          notes:
+            typeof item.notes === 'string'
+              ? item.notes
+              : null,
+          completed_by:
+            typeof item.completed_by === 'string'
+              ? item.completed_by
+              : null,
+          provider_confirmed_at:
+            typeof item.provider_confirmed_at === 'string'
+              ? item.provider_confirmed_at
+              : null,
+          payment_type: String(
+            item.payment_type ?? '—',
+          ),
+          provider: String(item.provider ?? '—'),
+          currency: String(item.currency ?? 'SLE'),
+          payer_name:
+            typeof item.payer_name === 'string'
+              ? item.payer_name
+              : null,
+          order_number: String(
+            item.order_number ?? '—',
+          ),
+        }
+      })
+    : []
+
+  const eligiblePaymentCount = toNumber(
+    result?.eligible_payment_count,
+  )
+  const refundCount = toNumber(result?.refund_count)
+  const returnedRefundPage = Math.max(
+    1,
+    toNumber(result?.refund_page) || refundPage,
+  )
+  const returnedRefundPageSize = Math.max(
+    1,
+    toNumber(result?.refund_page_size) ||
+      refundPageSize,
+  )
+  const totalRefundPages = Math.max(
+    1,
+    Math.ceil(refundCount / returnedRefundPageSize),
+  )
+
   return {
+    paymentQuery,
     eligiblePayments,
+    eligiblePaymentCount,
     refunds,
+    refundCount,
+    refundPage: returnedRefundPage,
+    refundPageSize: returnedRefundPageSize,
+    totalRefundPages,
   }
 }
 
@@ -214,7 +272,9 @@ export async function getFinanceReportsData(filters: {
         const rawMethod = String(item.payment_method ?? 'unknown')
         return {
           payment_method:
-            rawMethod === 'in-app' || rawMethod === 'momo' || rawMethod === 'card'
+            rawMethod === 'in-app' ||
+            rawMethod === 'momo' ||
+            rawMethod === 'card'
               ? rawMethod
               : 'unknown',
           currency: String(item.currency ?? 'SLE'),

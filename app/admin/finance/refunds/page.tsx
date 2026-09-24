@@ -4,6 +4,8 @@ type PageProps = {
   searchParams: Promise<{
     recorded?: string
     error?: string
+    payment_q?: string
+    refund_page?: string
   }>
 }
 
@@ -16,6 +18,8 @@ export default async function RefundsPage({
     <FinanceRefundsLivePage
       recorded={params.recorded}
       error={params.error}
+      paymentQuery={params.payment_q}
+      refundPage={params.refund_page}
     />
   )
 }

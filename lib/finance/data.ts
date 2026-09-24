@@ -38,13 +38,6 @@ function paymentMethod(payment: PaymentRow) {
   return 'unknown'
 }
 
-function isOlderThan(value: string, minutes: number) {
-  return (
-    Date.now() - new Date(value).getTime() >
-    minutes * 60 * 1000
-  )
-}
-
 async function getPaymentRows(limit = 500) {
   const admin = createAdminClient()
 
@@ -183,13 +176,15 @@ export async function getFinanceOverviewData() {
     ? summary.method_breakdown.map((row) => {
         const item = row as Record<string, unknown>
         const rawMethod = String(item.payment_method ?? 'unknown')
-        const paymentMethod =
-          rawMethod === 'in-app' || rawMethod === 'momo' || rawMethod === 'card'
+        const normalizedMethod =
+          rawMethod === 'in-app' ||
+          rawMethod === 'momo' ||
+          rawMethod === 'card'
             ? rawMethod
             : 'unknown'
 
         return {
-          payment_method: paymentMethod,
+          payment_method: normalizedMethod,
           currency: String(item.currency ?? 'SLE'),
           count: toNumber(item.count),
           amount: toNumber(item.amount),
@@ -342,285 +337,116 @@ export type ReconciliationCase = {
   can_repair_payment: boolean
 }
 
-export async function getFinanceReconciliationData() {
+export async function getFinanceReconciliationData(
+  filters: {
+    page?: string
+  } = {},
+) {
   await requirePermission(
     'finance.manage',
     '/admin/finance/reconciliation',
   )
 
+  const page = Math.max(
+    1,
+    Number.parseInt(filters.page ?? '1', 10) || 1,
+  )
+  const pageSize = 50
   const admin = createAdminClient()
 
-  const [
-    payments,
-    eventsResult,
-    voteOrdersResult,
-    ticketOrdersResult,
-    orderItemsResult,
-    ledgerResult,
-    ticketsResult,
-  ] = await Promise.all([
-    getPaymentRows(1000),
-    admin
-      .from('payment_events')
-      .select(
-        'id,provider,provider_event_id,payment_id,event_type,processed_at,processing_error,received_at,payload',
-      )
-      .order('received_at', { ascending: false })
-      .limit(1000),
-    admin.from('vote_orders').select('id,order_number,status'),
-    admin
-      .from('ticket_orders')
-      .select(
-        'id,order_number,status,delivery_status,delivery_last_error',
-      ),
-    admin
-      .from('ticket_order_items')
-      .select(
-        'id,ticket_order_id,quantity,admissions_per_unit',
-      ),
-    admin.from('vote_ledger').select('payment_id,source_key'),
-    admin.from('tickets').select('id,ticket_order_id,status'),
-  ])
+  const { data, error } = await admin.rpc(
+    'finance_reconciliation_page',
+    {
+      p_page: page,
+      p_page_size: pageSize,
+    },
+  )
 
-  for (const [label, result] of [
-    ['payment events', eventsResult],
-    ['vote orders', voteOrdersResult],
-    ['ticket orders', ticketOrdersResult],
-    ['ticket order items', orderItemsResult],
-    ['vote ledger', ledgerResult],
-    ['tickets', ticketsResult],
-  ] as const) {
-    if (result.error) {
-      console.error(`finance reconciliation ${label}`, result.error)
-      throw new Error(
-        `Unable to load ${label} for reconciliation.`,
-      )
-    }
+  if (error) {
+    console.error('finance reconciliation page', error)
+    throw new Error('Unable to load reconciliation cases.')
   }
 
-  const events = eventsResult.data ?? []
-  const voteOrders = voteOrdersResult.data ?? []
-  const ticketOrders = ticketOrdersResult.data ?? []
-  const orderItems = orderItemsResult.data ?? []
-  const ledger = ledgerResult.data ?? []
-  const tickets = ticketsResult.data ?? []
+  type ReconciliationRpcRow = {
+    critical_count: number | string
+    warning_count: number | string
+    total_count: number | string
+    cases: unknown
+  }
 
-  const paymentMap = new Map(
-    payments.map((payment) => [payment.id, payment]),
-  )
-  const voteOrderMap = new Map(
-    voteOrders.map((order) => [order.id, order]),
-  )
-  const ticketOrderMap = new Map(
-    ticketOrders.map((order) => [order.id, order]),
-  )
-  const ledgerPaymentIds = new Set(
-    ledger
-      .map((entry) => entry.payment_id)
-      .filter((value): value is string => Boolean(value)),
-  )
+  const result =
+    (data?.[0] ?? null) as ReconciliationRpcRow | null
 
-  const expectedTickets = new Map<string, number>()
-  for (const item of orderItems) {
-    expectedTickets.set(
-      item.ticket_order_id,
-      (expectedTickets.get(item.ticket_order_id) ?? 0) +
-        item.quantity * item.admissions_per_unit,
+  const rawCases = Array.isArray(result?.cases)
+    ? result.cases
+    : []
+
+  const cases: ReconciliationCase[] = rawCases.map((row) => {
+    const item = row as Record<string, unknown>
+    const severity =
+      item.severity === 'critical' ? 'critical' : 'warning'
+
+    const rawKind = String(item.kind ?? '')
+    const validKinds = new Set<ReconciliationCase['kind']>([
+      'webhook',
+      'vote_settlement',
+      'ticket_settlement',
+      'ticket_issuance',
+      'ticket_delivery',
+      'stale_payment',
+    ])
+
+    const kind = validKinds.has(
+      rawKind as ReconciliationCase['kind'],
     )
-  }
+      ? (rawKind as ReconciliationCase['kind'])
+      : 'stale_payment'
 
-  const issuedTickets = new Map<string, number>()
-  for (const ticket of tickets) {
-    issuedTickets.set(
-      ticket.ticket_order_id,
-      (issuedTickets.get(ticket.ticket_order_id) ?? 0) + 1,
-    )
-  }
+    const rawEventId = item.payment_event_id
+    const paymentEventId =
+      typeof rawEventId === 'number'
+        ? rawEventId
+        : rawEventId != null &&
+            Number.isFinite(Number(rawEventId))
+          ? Number(rawEventId)
+          : null
 
-  const cases: ReconciliationCase[] = []
-
-  for (const event of events) {
-    if (
-      event.event_type === 'completed' &&
-      (!event.processed_at || event.processing_error)
-    ) {
-      const payment = event.payment_id
-        ? paymentMap.get(event.payment_id)
-        : null
-
-      const order =
-        payment?.vote_order_id
-          ? voteOrderMap.get(payment.vote_order_id)
-          : payment?.ticket_order_id
-            ? ticketOrderMap.get(payment.ticket_order_id)
-            : null
-
-      cases.push({
-        key: `event:${event.id}`,
-        severity: 'critical',
-        kind: 'webhook',
-        title: 'Completed Vult webhook needs reprocessing',
-        detail:
-          event.processing_error ||
-          'Provider completion was received but the event was not marked processed.',
-        payment_id: event.payment_id ?? null,
-        payment_event_id: event.id,
-        order_number: order?.order_number ?? null,
-        created_at: event.received_at,
-        can_reprocess_event: Boolean(event.payment_id),
-        can_repair_payment: false,
-      })
+    return {
+      key: String(item.key ?? ''),
+      severity,
+      kind,
+      title: String(item.title ?? ''),
+      detail: String(item.detail ?? ''),
+      payment_id:
+        typeof item.payment_id === 'string'
+          ? item.payment_id
+          : null,
+      payment_event_id: paymentEventId,
+      order_number:
+        typeof item.order_number === 'string'
+          ? item.order_number
+          : null,
+      created_at: String(item.created_at ?? ''),
+      can_reprocess_event: item.can_reprocess_event === true,
+      can_repair_payment: item.can_repair_payment === true,
     }
-  }
-
-  for (const payment of payments) {
-    if (payment.status === 'succeeded') {
-      if (
-        payment.payment_type === 'vote' &&
-        payment.vote_order_id
-      ) {
-        const order = voteOrderMap.get(payment.vote_order_id)
-
-        if (
-          order?.status !== 'paid' ||
-          !ledgerPaymentIds.has(payment.id)
-        ) {
-          cases.push({
-            key: `vote:${payment.id}`,
-            severity: 'critical',
-            kind: 'vote_settlement',
-            title: 'Successful vote payment is not fully settled',
-            detail:
-              order?.status !== 'paid'
-                ? 'The payment succeeded but the vote order is not marked paid.'
-                : 'The payment succeeded but its vote-ledger entry is missing.',
-            payment_id: payment.id,
-            payment_event_id: null,
-            order_number: order?.order_number ?? null,
-            created_at: payment.paid_at ?? payment.created_at,
-            can_reprocess_event: false,
-            can_repair_payment: true,
-          })
-        }
-      }
-
-      if (
-        payment.payment_type === 'ticket' &&
-        payment.ticket_order_id
-      ) {
-        const order = ticketOrderMap.get(
-          payment.ticket_order_id,
-        )
-
-        if (order?.status !== 'paid') {
-          cases.push({
-            key: `ticket-settlement:${payment.id}`,
-            severity: 'critical',
-            kind: 'ticket_settlement',
-            title: 'Successful ticket payment is not fully settled',
-            detail:
-              'The payment succeeded but the ticket order is not marked paid.',
-            payment_id: payment.id,
-            payment_event_id: null,
-            order_number: order?.order_number ?? null,
-            created_at: payment.paid_at ?? payment.created_at,
-            can_reprocess_event: false,
-            can_repair_payment: true,
-          })
-        }
-
-        const expected =
-          expectedTickets.get(payment.ticket_order_id) ?? 0
-        const issued =
-          issuedTickets.get(payment.ticket_order_id) ?? 0
-
-        if (
-          order?.status === 'paid' &&
-          expected > 0 &&
-          expected !== issued
-        ) {
-          cases.push({
-            key: `ticket-issuance:${payment.id}`,
-            severity: 'critical',
-            kind: 'ticket_issuance',
-            title: 'Paid ticket order has an issuance mismatch',
-            detail: `Expected ${expected} individual ticket(s), but ${issued} were issued.`,
-            payment_id: payment.id,
-            payment_event_id: null,
-            order_number: order?.order_number ?? null,
-            created_at: payment.paid_at ?? payment.created_at,
-            can_reprocess_event: false,
-            can_repair_payment: true,
-          })
-        }
-
-        if (order?.delivery_status === 'failed') {
-          cases.push({
-            key: `ticket-delivery:${payment.id}`,
-            severity: 'warning',
-            kind: 'ticket_delivery',
-            title: 'Ticket email delivery failed',
-            detail:
-              order.delivery_last_error ||
-              'The paid order is valid but its email delivery failed.',
-            payment_id: payment.id,
-            payment_event_id: null,
-            order_number: order.order_number,
-            created_at: payment.paid_at ?? payment.created_at,
-            can_reprocess_event: false,
-            can_repair_payment: true,
-          })
-        }
-      }
-    }
-
-    if (
-      ['pending', 'processing'].includes(payment.status) &&
-      isOlderThan(payment.created_at, 30)
-    ) {
-      const order =
-        payment.vote_order_id
-          ? voteOrderMap.get(payment.vote_order_id)
-          : payment.ticket_order_id
-            ? ticketOrderMap.get(payment.ticket_order_id)
-            : null
-
-      cases.push({
-        key: `stale:${payment.id}`,
-        severity: 'warning',
-        kind: 'stale_payment',
-        title: 'Payment has been pending for more than 30 minutes',
-        detail:
-          payment.failure_reason ||
-          'No confirmed successful settlement has been recorded. Review before taking any manual action.',
-        payment_id: payment.id,
-        payment_event_id: null,
-        order_number: order?.order_number ?? null,
-        created_at: payment.created_at,
-        can_reprocess_event: false,
-        can_repair_payment: false,
-      })
-    }
-  }
-
-  cases.sort((a, b) => {
-    if (a.severity !== b.severity) {
-      return a.severity === 'critical' ? -1 : 1
-    }
-
-    return (
-      new Date(b.created_at).getTime() -
-      new Date(a.created_at).getTime()
-    )
   })
+
+  const criticalCount = toNumber(result?.critical_count)
+  const warningCount = toNumber(result?.warning_count)
+  const totalCount = toNumber(result?.total_count)
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalCount / pageSize),
+  )
 
   return {
     cases,
-    criticalCount: cases.filter(
-      (item) => item.severity === 'critical',
-    ).length,
-    warningCount: cases.filter(
-      (item) => item.severity === 'warning',
-    ).length,
+    criticalCount,
+    warningCount,
+    totalCount,
+    page,
+    pageSize,
+    totalPages,
   }
 }

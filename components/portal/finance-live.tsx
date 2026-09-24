@@ -368,7 +368,7 @@ function financePaymentsHref(
   if (filters.method) params.set('method', filters.method)
   if (page > 1) params.set('page', String(page))
 
-const query = params.toString()
+  const query = params.toString()
   return query
     ? `/admin/finance/payments?${query}`
     : '/admin/finance/payments'
@@ -458,7 +458,7 @@ export async function FinancePaymentsLivePage({
           </select>
         </label>
 
-       <label>
+        <label>
           Payment method
           <select
             name="method"
@@ -628,12 +628,14 @@ export async function FinanceReconciliationLivePage({
   reprocessed,
   repaired,
   error,
+  page,
 }: {
   reprocessed?: string
   repaired?: string
   error?: string
+  page?: string
 }) {
-  const data = await getFinanceReconciliationData()
+  const data = await getFinanceReconciliationData({ page })
 
   return (
     <div className="portal-content v2-admin-page mobile-admin-page">
@@ -679,7 +681,7 @@ export async function FinanceReconciliationLivePage({
 
         <article>
           <span>Total cases</span>
-          <strong>{data.cases.length}</strong>
+          <strong>{data.totalCount}</strong>
           <small>Current derived exceptions</small>
         </article>
       </div>
@@ -820,6 +822,36 @@ export async function FinanceReconciliationLivePage({
             </tbody>
           </table>
         </div>
+
+        {data.totalPages > 1 ? (
+          <div className="v2-admin-page-actions">
+            {data.page > 1 ? (
+              <Link
+                className="button secondary"
+                href={`/admin/finance/reconciliation?page=${
+                  data.page - 1
+                }`}
+              >
+                Previous
+              </Link>
+            ) : null}
+
+            <span className="live-data-badge">
+              PAGE {data.page} OF {data.totalPages}
+            </span>
+
+            {data.page < data.totalPages ? (
+              <Link
+                className="button secondary"
+                href={`/admin/finance/reconciliation?page=${
+                  data.page + 1
+                }`}
+              >
+                Next
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
       </section>
     </div>
   )

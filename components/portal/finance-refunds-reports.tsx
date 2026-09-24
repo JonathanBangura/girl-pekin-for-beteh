@@ -83,14 +83,41 @@ function RefundNotice({
   return null
 }
 
+function financeRefundsHref(
+  paymentQuery: string,
+  page: number,
+) {
+  const params = new URLSearchParams()
+
+  if (paymentQuery) {
+    params.set('payment_q', paymentQuery)
+  }
+
+  if (page > 1) {
+    params.set('refund_page', String(page))
+  }
+
+  const query = params.toString()
+  return query
+    ? `/admin/finance/refunds?${query}`
+    : '/admin/finance/refunds'
+}
+
 export async function FinanceRefundsLivePage({
   recorded,
   error,
+  paymentQuery,
+  refundPage,
 }: {
   recorded?: string
   error?: string
+  paymentQuery?: string
+  refundPage?: string
 }) {
-  const data = await getRefundManagementData()
+  const data = await getRefundManagementData({
+    payment_q: paymentQuery,
+    refund_page: refundPage,
+  })
 
   return (
     <div className="portal-content v2-admin-page mobile-admin-page">
@@ -145,6 +172,36 @@ export async function FinanceRefundsLivePage({
 
       <details className="panel live-create-panel">
         <summary>Record completed external refund/reversal</summary>
+
+        <form
+          className="live-admin-form mobile-admin-form"
+          method="get"
+        >
+          <label className="full">
+            Find successful payment
+            <input
+              name="payment_q"
+              defaultValue={data.paymentQuery}
+              placeholder="Order number, payment ID, provider reference, payer name, email or phone"
+            />
+            <small>
+              {data.eligiblePaymentCount.toLocaleString()} eligible
+              payment(s) match. Up to 25 are shown at a time.
+            </small>
+          </label>
+
+          <div className="full v2-admin-page-actions">
+            <button className="button" type="submit">
+              Search payments
+            </button>
+            <Link
+              className="button secondary"
+              href="/admin/finance/refunds"
+            >
+              Clear search
+            </Link>
+          </div>
+        </form>
 
         {data.eligiblePayments.length ? (
           <form
@@ -251,8 +308,9 @@ export async function FinanceRefundsLivePage({
         ) : (
           <div className="live-empty-state compact">
             <strong>
-              No fully settled successful payment is currently
-              eligible.
+              {data.paymentQuery
+                ? 'No eligible successful payment matches that search.'
+                : 'No fully settled successful payment is currently eligible.'}
             </strong>
           </div>
         )}
@@ -263,7 +321,7 @@ export async function FinanceRefundsLivePage({
           <div>
             <h2>Refund register</h2>
             <span className="live-data-badge">
-              {data.refunds.length} RECORDS
+              {data.refundCount} RECORDS
             </span>
           </div>
         </div>
@@ -332,6 +390,38 @@ export async function FinanceRefundsLivePage({
             </tbody>
           </table>
         </div>
+
+        {data.totalRefundPages > 1 ? (
+          <div className="v2-admin-page-actions">
+            {data.refundPage > 1 ? (
+              <Link
+                className="button secondary"
+                href={financeRefundsHref(
+                  data.paymentQuery,
+                  data.refundPage - 1,
+                )}
+              >
+                Previous
+              </Link>
+            ) : null}
+
+            <span className="live-data-badge">
+              PAGE {data.refundPage} OF {data.totalRefundPages}
+            </span>
+
+            {data.refundPage < data.totalRefundPages ? (
+              <Link
+                className="button secondary"
+                href={financeRefundsHref(
+                  data.paymentQuery,
+                  data.refundPage + 1,
+                )}
+              >
+                Next
+              </Link>
+            ) : null}
+          </div>
+        ) : null}
       </section>
     </div>
   )
@@ -474,7 +564,9 @@ export async function FinanceReportsLivePage({
             </thead>
             <tbody>
               {data.byType.map((row) => (
-                <tr key={row.payment_type}>
+                <tr
+                  key={`${row.payment_type}:${row.currency}`}
+                >
                   <td>{humanize(row.payment_type)}</td>
                   <td>{row.count}</td>
                   <td>
@@ -497,7 +589,7 @@ export async function FinanceReportsLivePage({
         </div>
       </section>
 
-            <section className="panel v2-admin-table-panel">
+      <section className="panel v2-admin-table-panel">
         <div className="v2-admin-table-toolbar">
           <div>
             <h2>Collections by payment method</h2>

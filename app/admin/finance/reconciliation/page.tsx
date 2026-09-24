@@ -5,6 +5,7 @@ type PageProps = {
     reprocessed?: string
     repaired?: string
     error?: string
+    page?: string
   }>
 }
 
@@ -18,6 +19,7 @@ export default async function ReconciliationPage({
       reprocessed={params.reprocessed}
       repaired={params.repaired}
       error={params.error}
+      page={params.page}
     />
   )
 }
