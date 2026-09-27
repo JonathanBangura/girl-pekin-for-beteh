@@ -28,7 +28,6 @@ import {
   Ticket,
   TrendingUp,
   Trophy,
-  Undo2,
   UserRound,
   Users,
   Vote,
@@ -97,7 +96,6 @@ const adminGroups: readonly NavGroup[] = [
       ['Overview', '/admin/finance', WalletCards],
       ['Payments', '/admin/finance/payments', Receipt],
       ['Reconciliation', '/admin/finance/reconciliation', RefreshCw],
-      ['Refunds', '/admin/finance/refunds', Undo2],
       ['Reports', '/admin/finance/reports', FileBarChart],
     ],
   ],
@@ -162,7 +160,6 @@ function routeLabel(path: string, admin: boolean) {
     '/admin/finance/payments': 'Finance / Payments',
     '/admin/finance/reconciliation':
       'Finance / Reconciliation',
-    '/admin/finance/refunds': 'Finance / Refunds',
     '/admin/finance/reports': 'Finance / Reports',
     '/admin/communication': 'Communication',
     '/admin/content': 'Content',

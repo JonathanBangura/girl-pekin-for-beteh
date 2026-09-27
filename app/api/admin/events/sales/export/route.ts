@@ -92,12 +92,6 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const validStatuses = new Set([
-    'succeeded',
-    'refunded',
-    'partially_refunded',
-    'reversed',
-  ])
   const validMethods = new Set([
     'in-app',
     'momo',
@@ -105,14 +99,9 @@ export async function GET(request: NextRequest) {
     'unknown',
   ])
 
-  const rawStatus =
-    request.nextUrl.searchParams.get('status')?.trim() ?? ''
   const rawMethod =
     request.nextUrl.searchParams.get('method')?.trim() ?? ''
 
-  const status = validStatuses.has(rawStatus)
-    ? rawStatus
-    : null
   const method = validMethods.has(rawMethod)
     ? rawMethod
     : null
@@ -143,8 +132,6 @@ export async function GET(request: NextRequest) {
     payment_status: string
     order_status: string
     paid_at: string
-    refund_amount: number | string
-    current_net: number | string
     total_count: number | string
   }
 
@@ -157,7 +144,7 @@ export async function GET(request: NextRequest) {
         p_event_id: eventId,
         p_from: from,
         p_to: to,
-        p_status: status,
+        p_status: 'succeeded',
         p_method: method,
         p_page: page,
         p_page_size: pageSize,
@@ -191,9 +178,7 @@ export async function GET(request: NextRequest) {
       'Admissions',
       'Payment Method',
       'Provider',
-      'Gross Amount',
-      'Refund Amount',
-      'Current Net',
+      'Amount',
       'Currency',
       'Payment Status',
       'Order Status',
@@ -212,8 +197,6 @@ export async function GET(request: NextRequest) {
       paymentMethodLabel(row.payment_method),
       row.provider,
       row.gross_amount,
-      row.refund_amount,
-      row.current_net,
       row.currency,
       row.payment_status,
       row.order_status,

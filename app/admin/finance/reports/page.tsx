@@ -1,4 +1,4 @@
-import { FinanceReportsLivePage } from '@/components/portal/finance-refunds-reports'
+import { FinanceReportsV1Page } from '@/components/portal/finance-reports-v1'
 
 type PageProps = {
   searchParams: Promise<{
@@ -12,5 +12,5 @@ export default async function ReportsPage({
 }: PageProps) {
   const filters = await searchParams
 
-  return <FinanceReportsLivePage filters={filters} />
+  return <FinanceReportsV1Page filters={filters} />
 }

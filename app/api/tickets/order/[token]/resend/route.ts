@@ -26,9 +26,12 @@ export async function POST(
     )
   }
 
-  if (order.status !== 'paid') {
+  if (!['paid', 'confirmed'].includes(order.status)) {
     return NextResponse.json(
-      { error: 'Tickets can be emailed only after payment is confirmed.' },
+      {
+        error:
+          'Tickets can be emailed only after the order is confirmed.',
+      },
       { status: 409 },
     )
   }

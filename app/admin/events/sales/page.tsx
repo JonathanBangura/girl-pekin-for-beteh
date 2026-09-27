@@ -1,11 +1,10 @@
-import { EventSalesLivePage } from '@/components/portal/event-sales-live'
+import { EventSalesV1Page } from '@/components/portal/event-sales-v1'
 
 type PageProps = {
   searchParams: Promise<{
     event_id?: string
     from?: string
     to?: string
-    status?: string
     method?: string
     page?: string
   }>
@@ -16,5 +15,5 @@ export default async function EventSalesPage({
 }: PageProps) {
   const filters = await searchParams
 
-  return <EventSalesLivePage filters={filters} />
+  return <EventSalesV1Page filters={filters} />
 }
