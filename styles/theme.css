@@ -1,0 +1,96 @@
+/*
+  GIRL PIKIN FOR BETTEH — THEME TOKENS
+
+  This is now the authoritative place for site-wide theme values.
+
+  IMPORTANT:
+  - Change brand/theme colors here instead of appending another :root block
+    to legacy.css.
+  - Do not place page-specific component styling in this file.
+  - styles/legacy.css remains temporarily for visual compatibility while the
+    old stylesheet is consolidated in controlled passes.
+*/
+
+:root {
+  /* ---------------------------------------------------------
+     BRAND
+     --------------------------------------------------------- */
+  --brand-primary: #0d5f50;
+  --brand-primary-deep: #082f29;
+  --brand-primary-hover: #0a574a;
+
+  --brand-accent: #f2aa00;
+  --brand-accent-dark: #d98f00;
+  --brand-accent-hover: #ffc02f;
+
+  /* ---------------------------------------------------------
+     TEXT
+     --------------------------------------------------------- */
+  --text-heading: #10251f;
+  --text-body: #14231f;
+  --text-ui: #173b3a;
+  --text-muted: #50635d;
+  --text-subtle: #526660;
+
+  /* ---------------------------------------------------------
+     SURFACES
+     --------------------------------------------------------- */
+  --surface-page: #f5f6f4;
+  --surface-card: #ffffff;
+  --surface-soft: #fafbfa;
+  --surface-muted: #edf1ef;
+  --surface-dark: #082f29;
+
+  /* ---------------------------------------------------------
+     BORDERS
+     --------------------------------------------------------- */
+  --border-default: #dfe5e2;
+  --border-strong: #cfd8d2;
+
+  /* ---------------------------------------------------------
+     STATUS / SUPPORTING ACCENTS
+     --------------------------------------------------------- */
+  --status-success: #0d5f50;
+  --status-warning: #f2aa00;
+  --status-danger: #a84335;
+
+  /* Kept for existing V1 component compatibility. */
+  --legacy-coral: #9b5c4d;
+
+  /* ---------------------------------------------------------
+     SHAPE / ELEVATION
+     --------------------------------------------------------- */
+  --radius: 12px;
+  --shadow-sm:
+    0 1px 2px rgba(10, 31, 27, 0.035),
+    0 8px 24px rgba(10, 31, 27, 0.035);
+  --shadow-md: 0 18px 48px rgba(10, 31, 27, 0.09);
+
+  /* ---------------------------------------------------------
+     EXISTING V1 VARIABLE API
+     Keep these mappings while legacy.css is being consolidated.
+     --------------------------------------------------------- */
+  --background: var(--surface-page);
+  --foreground: var(--text-body);
+
+  --card: var(--surface-card);
+  --card-foreground: var(--text-body);
+
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+
+  --border: var(--border-default);
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--text-muted);
+
+  --gold: var(--brand-accent);
+  --gold-dark: var(--brand-accent-dark);
+  --ink: var(--text-heading);
+  --coral: var(--legacy-coral);
+  --surface: var(--surface-soft);
+
+  /* Current V4 readability variables. */
+  --ui-text: var(--text-ui);
+  --ui-subtle: var(--text-subtle);
+  --ui-border-strong: var(--border-strong);
+}
