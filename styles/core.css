@@ -1,0 +1,140 @@
+
+
+* {box-sizing: border-boxborder-color: var(--border)}
+
+html {background: var(--background)scroll-behavior: smooth}
+
+body {margin: 0background: var(--background)color: var(--foreground)}
+
+a {color: inherittext-decoration: none}
+
+button,
+input,
+select,
+textarea {font: inherit}
+
+button {cursor: pointer}
+
+h1,
+h2,
+h3,
+p {margin: 0}
+
+
+.site-header {display: flexalign-items: centerjustify-content: space-betweengap: 24px}
+
+.brand {display: flexalign-items: center}
+
+.mark {display: gridplace-items: centerposition: relativefont-weight: 800}
+
+.mark i {position: absolute}
+
+.site-header nav,
+.header-actions {display: flexalign-items: center}
+
+.portal-link,
+.text-button,
+.vote-link {border: 0background: transparentdisplay: inline-flexalign-items: centergap: 5px}
+
+.button {border: 0display: inline-flexalign-items: centerjustify-content: centergap: 8px}
+
+.menu-btn {display: nonebackground: none}
+
+.mobile-nav {display: none}
+
+.pill {display: inline-flexalign-items: centerwidth: max-contenttext-transform: uppercase}
+
+
+.hero {max-width: 1240pxmargin: autopadding: 70px 32px 110pxdisplay: gridgrid-template-columns: 1fr .9frgap: 50pxalign-items: center}
+
+.hero-actions {display: flexalign-items: center}
+
+.section {max-width: 1240pxmargin: autopadding: 115px 32px}
+
+.section-intro {display: gridgrid-template-columns: 1fr 1frgap: 32pxalign-items: endmargin-bottom: 48px}
+
+.section-heading {display: flexalign-items: endjustify-content: space-betweengap: 30pxmargin-bottom: 44px}
+
+.section-heading > p {max-width: 320px}
+
+.section-surface {max-width: none}
+
+.panel {background: var(--card)border: 1px solid var(--border)border-radius: 13pxpadding: 24px}
+
+.panel-heading {display: flexjustify-content: space-betweenalign-items: centergap: 12px}
+
+.event-grid,
+.news-grid,
+.nominee-grid {display: gridgrid-template-columns: repeat(3, 1fr)gap: 16px}
+
+.event-card {min-height: 280pxbackground: var(--card)border: 1px solid var(--border)border-radius: 16pxpadding: 23pxdisplay: flexflex-direction: column}
+
+.event-date {display: flexgap: 7pxalign-items: baselinemargin-bottom: 27px}
+
+.event-card footer {display: flexjustify-content: space-betweenalign-items: centermargin-top: autoborder-top: 1px solid var(--border)padding-top: 15px}
+
+.footer {display: gridgrid-template-columns: 1fr 1fr 1frgap: 25pxalign-items: start}
+
+
+.portal {min-height: 100vhdisplay: flex}
+
+.portal-side {width: 235pxbackground: var(--ink)color: #fffdisplay: flexflex-direction: columnflex: 0 0 auto}
+
+.portal-main {flex: 1min-width: 0}
+
+.portal-header {display: flexalign-items: centerjustify-content: space-between}
+
+.portal-title {display: flexjustify-content: space-betweengap: 20pxalign-items: start}
+
+.stat-row,
+.admin-stats {display: gridgrid-template-columns: repeat(3, 1fr)}
+
+.portal-grid {display: gridgrid-template-columns: 1.35fr 1fr}
+
+.bars {display: flexalign-items: end}
+
+.responsive-table {overflow-x: auto}
+
+.responsive-table table {width: 100%border-collapse: collapse}
+
+
+.scanner {min-height: 100vhcolor: #fff}
+
+.scanner header {display: flexalign-items: centerjustify-content: space-between}
+
+.scanner-body {margin: auto}
+
+.scanner-heading {text-align: center}
+
+.scan-frame {display: flexjustify-content: centeralign-items: centerflex-direction: columnposition: relative}
+
+.scan-frame i {position: absolute}
+
+.manual {display: flex}
+
+.scan-result {text-align: center}
+
+.result-icon {display: gridplace-items: center}
+
+
+@media (max-width: 800px) {
+  .site-header .desktop-nav,
+  .site-header .header-actions {display: none}
+
+  .menu-btn {display: gridplace-items: center}
+
+  .mobile-nav {position: absolutedisplay: flexflex-direction: column}
+
+  .hero {grid-template-columns: 1fr}
+
+  .section-intro,
+  .section-heading {display: block}
+
+  .event-grid,
+  .news-grid,
+  .nominee-grid {grid-template-columns: 1fr}
+
+  .portal-grid {grid-template-columns: 1fr}
+
+  .manual {flex-direction: column}
+}

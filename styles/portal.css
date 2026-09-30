@@ -1,0 +1,194 @@
+
+
+.live-data-badge {display: inline-flexalign-items: centermin-height: 30pxpadding: 0 10pxborder: 1px solid #cfe0daborder-radius: 6pxbackground: #eef6f3color: var(--brand-primary)font-size: 10.5pxfont-weight: 850letter-spacing: .1em}
+
+.live-edition-summary {display: gridgrid-template-columns: repeat(2, minmax(0,1fr))gap: 1pxmargin-top: 22pxbackground: #dfe8e4border: 1px solid #dfe8e4}
+
+.live-edition-summary > div {display: gridgap: 6pxmin-height: 96pxpadding: 18pxbackground: #fff}
+
+.live-edition-summary span {color: #71817bfont-size: 11pxfont-weight: 800letter-spacing: .07emtext-transform: uppercase}
+
+.live-edition-summary strong {color: #173a32font-size: 15px}
+
+.live-empty-state {padding: 30pxborder: 1px dashed #cdd9d5background: #fafcfbcolor: #52645d}
+
+.live-empty-state.compact {margin: 12px 0padding: 22px}
+
+.live-empty-state strong {display: blockcolor: #183b33font-size: 15px}
+
+.live-empty-state p,
+.live-empty-copy {margin: 6px 0 0color: #71817bfont-size: 13pxline-height: 1.55}
+
+.live-table-wrap {width: 100%overflow-x: auto}
+
+.live-admin-table {width: 100%border-collapse: collapsemin-width: 780px}
+
+.live-admin-table th {padding: 14px 15pxborder-bottom: 1px solid #dce5e1background: #f7f9f8color: #536861text-align: leftfont-size: 11pxfont-weight: 850letter-spacing: .06emtext-transform: uppercase}
+
+.live-admin-table td {padding: 16px 15pxborder-bottom: 1px solid #e5ebe8color: #344b44font-size: 13pxvertical-align: middle}
+
+.live-admin-table td strong {display: blockcolor: #173a32font-size: 13.5px}
+
+.live-admin-table td small {display: blockmargin-top: 4pxcolor: #7a8883font-size: 11.5px}
+
+.live-status {font-weight: 750color: var(--brand-primary)}
+
+.live-create-panel {margin-bottom: 20pxpadding: 0overflow: hidden}
+
+.live-create-panel > summary {display: flexalign-items: centermin-height: 54pxpadding: 0 18pxcursor: pointercolor: var(--brand-primary)font-size: 14pxfont-weight: 850list-style: none}
+
+.live-create-panel > summary::-webkit-details-marker {display: none}
+
+.live-create-panel[open] > summary {border-bottom: 1px solid #e1e8e5}
+
+.live-admin-form {display: gridgrid-template-columns: repeat(2,minmax(0,1fr))gap: 16pxpadding: 20px}
+
+.live-admin-form label {display: gridgap: 7pxcolor: #354e46font-size: 12pxfont-weight: 800}
+
+.live-admin-form label small {color: #798781font-size: 11pxfont-weight: 500}
+
+.live-admin-form .full {grid-column: 1 / -1}
+
+.live-admin-form input,
+.live-admin-form select,
+.live-admin-form textarea {width: 100%border: 1px solid #ccd8d4border-radius: 7pxbackground: #fffcolor: #173a32padding: 11px 12pxfont: inheritfont-size: 14px}
+
+.live-admin-form input,
+.live-admin-form select {min-height: 44px}
+
+.live-admin-form textarea {resize: vertical}
+
+.live-admin-form input:focus,
+.live-admin-form select:focus,
+.live-admin-form textarea:focus {outline: 3px solid rgba(13,95,80,.12)border-color: var(--brand-primary)}
+
+.live-admin-form .live-check {display: flexalign-items: centergrid-template-columns: nonegap: 9pxalign-self: endmin-height: 44px}
+
+.live-admin-form .live-check input {width: 17pxmin-height: 17pxheight: 17px}
+
+.live-form-message {margin-bottom: 18pxpadding: 12px 14pxborder-radius: 7pxfont-size: 13pxfont-weight: 700}
+
+.live-form-message.success {border: 1px solid #bcdacebackground: #eef8f4color: var(--brand-primary)}
+
+.live-form-message.error {border: 1px solid #e4bcb4background: #fff3f0color: #8c352b}
+
+@media (max-width: 760px) {
+  .live-edition-summary,
+  .live-admin-form {grid-template-columns: 1fr}
+  .live-admin-form .full {grid-column: auto}
+}
+
+
+.live-row-editor {position: relative}
+
+.live-row-editor > summary {display: inline-flexalign-items: centermin-height: 34pxpadding: 0 10pxborder: 1px solid #cad8d3border-radius: 6pxcolor: var(--brand-primary)cursor: pointerfont-size: 12pxfont-weight: 800list-style: none}
+
+.live-row-editor > summary::-webkit-details-marker {display: none}
+.live-row-editor[open] {min-width: 280px}
+.live-row-editor.wide[open] {min-width: 390px}
+
+.live-row-form,
+.live-link-account form {display: gridgap: 12pxmargin-top: 12px}
+
+.live-row-form label,
+.live-link-account label {display: gridgap: 6pxcolor: #425a52font-size: 11pxfont-weight: 800}
+
+.live-row-form input,
+.live-row-form select,
+.live-row-form textarea,
+.live-link-account input {width: 100%min-height: 40pxborder: 1px solid #cad8d3border-radius: 6pxpadding: 9px 10pxbackground: #fffcolor: #173a32font-size: 13pxfont-family: inherit}
+
+.live-row-form textarea {min-height: 86pxresize: vertical}
+
+.live-management-stack {display: gridgap: 16pxmargin-top: 12pxpadding: 16pxborder: 1px solid #e0e7e4background: #fbfcfb}
+
+.live-inline-actions,
+.live-quick-status {display: flexalign-items: centerflex-wrap: wrapgap: 9px}
+
+.live-quick-status {padding-top: 14pxborder-top: 1px solid #e3e9e6}
+
+.live-quick-status > span,
+.live-link-account > span {width: 100%color: #6e7e78font-size: 10.5pxfont-weight: 850letter-spacing: .08emtext-transform: uppercase}
+
+.live-link-account {padding-top: 14pxborder-top: 1px solid #e3e9e6}
+
+.live-link-account p {margin: 6px 0 0color: #53675ffont-size: 12px}
+
+.live-public-nominee-grid {display: gridgrid-template-columns: repeat(3, minmax(0,1fr))gap: 18px}
+
+.live-public-nominee-card {overflow: hiddenborder: 1px solid #dce4e0background: #fff}
+
+.live-public-nominee-image {min-height: 230pxdisplay: gridplace-items: centerbackground: linear-gradient(145deg, rgba(13,95,80,.98), rgba(7,63,53,.98))background-size: coverbackground-position: center}
+
+.live-public-nominee-image > span {color: #ffffont-size: 52pxfont-weight: 850letter-spacing: -.04em}
+
+.live-public-nominee-body {padding: 20px}
+
+.live-public-nominee-body h3 {margin: 13px 0 6pxcolor: #173a32font-size: 22px}
+
+.live-public-nominee-body > p {min-height: 42pxmargin: 0 0 16pxcolor: #687770font-size: 14px}
+
+.live-public-nominee-meta {display: flexjustify-content: space-betweengap: 12pxmargin-bottom: 16pxpadding-top: 14pxborder-top: 1px solid #e3e9e6color: #52675ffont-size: 11.5pxfont-weight: 750}
+
+.live-award-poster-placeholder {width: 100%height: 100%min-height: 420pxdisplay: gridplace-items: centeralign-content: centergap: 14pxbackground: var(--brand-primary)color: #fff}
+
+.live-award-poster-placeholder span {font-size: 18pxfont-weight: 800}
+
+.live-public-empty {padding: 34pxborder: 1px dashed #ccd9d4background: #f8faf9color: #5f706afont-size: 14pxtext-align: center}
+
+.live-voting-closed {display: inline-flexalign-items: centermin-height: 44pxpadding: 0 16pxborder: 1px solid rgba(255,255,255,.24)color: #ffffont-size: 13pxfont-weight: 800}
+
+.live-directory-toolbar {display: gridgrid-template-columns: minmax(220px,1.4fr) minmax(190px,.8fr) auto autogap: 12pxalign-items: endmargin-bottom: 12px}
+
+.live-directory-toolbar label {display: gridgap: 6pxcolor: #53675ffont-size: 11pxfont-weight: 800}
+
+.live-directory-toolbar input,
+.live-directory-toolbar select {min-height: 44pxborder: 1px solid #cad7d2border-radius: 6pxpadding: 0 12pxbackground: #fffcolor: #173a32font-size: 14px}
+
+.live-directory-count {margin: 0 0 18pxcolor: #718079font-size: 12pxfont-weight: 750}
+
+.live-profile-photo,
+.live-portal-avatar {background-size: coverbackground-position: centeroverflow: hidden}
+
+.live-kpi-text {font-size: 20px !importantline-height: 1.15}
+
+.live-nominee-portal-profile {display: gridgrid-template-columns: auto 1frgap: 20pxalign-items: startmargin-top: 22px}
+
+.live-nominee-portal-profile h3 {margin: 0 0 5pxcolor: #173a32font-size: 21px}
+
+.live-nominee-portal-profile p {margin: 0 0 18pxcolor: #6b7a74}
+
+.live-nominee-portal-profile dl {display: gridgap: 10pxmargin: 0}
+
+.live-nominee-portal-profile dl div {display: flexjustify-content: space-betweengap: 16pxpadding-top: 10pxborder-top: 1px solid #e2e8e5}
+
+.live-nominee-portal-profile dt {color: #718079font-size: 11px}
+
+.live-nominee-portal-profile dd {margin: 0color: #263f37font-size: 12pxfont-weight: 800}
+
+.live-portal-event-card h2 {margin: 9px 0 16px}
+
+.live-portal-event-card p {display: flexgap: 8pxalign-items: flex-startcolor: #65766ffont-size: 13pxline-height: 1.5}
+
+@media (max-width: 980px) {
+  .live-public-nominee-grid {grid-template-columns: repeat(2, minmax(0,1fr))}
+  .live-directory-toolbar {grid-template-columns: 1fr 1fr}
+}
+
+@media (max-width: 640px) {
+  .live-public-nominee-grid,
+  .live-directory-toolbar,
+  .live-nominee-portal-profile {grid-template-columns: 1fr}
+  .live-public-nominee-image {min-height: 280px}
+  .live-row-editor.wide[open],
+  .live-row-editor[open] {min-width: 250px}
+}
+
+
+
+@media (min-width:801px) {
+  .portal-side {position:stickytop:0align-self:flex-startheight:100dvhmax-height:100dvhoverflow:hidden}
+  .portal-nav-scroll {min-height:0overflow-y:autooverflow-x:hiddenoverscroll-behavior:contain}
+  .portal-main {min-width:0min-height:100vh}
+}
+
