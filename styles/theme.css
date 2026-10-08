@@ -1082,3 +1082,40 @@ textarea:focus-visible {
 .scanner-no-events svg {
   color: var(--brand-primary);
 }
+
+/* =========================================================
+   FINAL NOMINEE CARD THEME CONSISTENCY
+   Removes the last legacy green fallback/tints from the public
+   nominee directory while preserving real uploaded photos.
+   ========================================================= */
+
+.live-public-nominee-card {
+  border-color: var(--border-default);
+  background: #fff;
+}
+
+.live-public-nominee-image {
+  background: linear-gradient(
+    145deg,
+    var(--brand-primary) 0%,
+    var(--brand-primary-deep) 100%
+  );
+}
+
+.live-public-nominee-image > span {
+  color: #fff;
+}
+
+.live-public-nominee-body h3 {
+  color: var(--text-heading);
+}
+
+.live-public-nominee-body > p {
+  color: var(--text-muted);
+}
+
+.live-public-nominee-meta {
+  border-top-color: var(--border-default);
+  color: #705762;
+}
+
