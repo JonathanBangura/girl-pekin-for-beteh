@@ -2,13 +2,19 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
-@import '../styles/theme.css';
 @import '../styles/core.css';
 @import '../styles/foundation.css';
 @import '../styles/portal.css';
 @import '../styles/transactions.css';
 @import '../styles/scanner.css';
 @import '../styles/cms.css';
+
+/*
+  Theme is intentionally imported LAST.
+  This lets one theme file control the approved palette while the
+  structural/layout modules remain reusable.
+*/
+@import '../styles/theme.css';
 
 @theme inline {
   --color-background: var(--background);

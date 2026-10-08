@@ -1,74 +1,76 @@
 /*
-  GIRL PIKIN FOR BETTEH — THEME TOKENS
+  GIRL PIKIN FOR BETTEH — PINK + WHITE THEME
 
-  This is now the authoritative place for site-wide theme values.
+  Design direction:
+  - White is the dominant surface.
+  - Strong berry-pink is the main brand/action colour.
+  - Deep berry replaces the former dark-green institutional areas.
+  - Soft blush surfaces create warmth without making the site feel childish.
+  - Success / warning / danger remain semantic colours.
 
   IMPORTANT:
-  - Change brand/theme colors here instead of appending another :root block
-    to legacy.css.
-  - Do not place page-specific component styling in this file.
-  - styles/legacy.css remains temporarily for visual compatibility while the
-    old stylesheet is consolidated in controlled passes.
+  This file is imported LAST from app/globals.css on purpose.
+  That makes it the single theme layer for current V1 modules, including a
+  small compatibility section for older hard-coded green/gold declarations.
 */
 
 :root {
   /* ---------------------------------------------------------
      BRAND
      --------------------------------------------------------- */
-  --brand-primary: #0d5f50;
-  --brand-primary-deep: #082f29;
-  --brand-primary-hover: #0a574a;
+  --brand-primary: #d81b60;
+  --brand-primary-deep: #78133b;
+  --brand-primary-hover: #b91650;
 
-  --brand-accent: #f2aa00;
-  --brand-accent-dark: #d98f00;
-  --brand-accent-hover: #ffc02f;
+  --brand-accent: #f3a6c2;
+  --brand-accent-dark: #dc7199;
+  --brand-accent-hover: #ffc4d9;
 
   /* ---------------------------------------------------------
      TEXT
      --------------------------------------------------------- */
-  --text-heading: #10251f;
-  --text-body: #14231f;
-  --text-ui: #173b3a;
-  --text-muted: #50635d;
-  --text-subtle: #526660;
+  --text-heading: #25171d;
+  --text-body: #33252b;
+  --text-ui: #472f39;
+  --text-muted: #6e5d65;
+  --text-subtle: #75656c;
 
   /* ---------------------------------------------------------
      SURFACES
      --------------------------------------------------------- */
-  --surface-page: #f5f6f4;
+  --surface-page: #fff9fb;
   --surface-card: #ffffff;
-  --surface-soft: #fafbfa;
-  --surface-muted: #edf1ef;
-  --surface-dark: #082f29;
+  --surface-soft: #fff2f7;
+  --surface-muted: #f8e9ef;
+  --surface-dark: #78133b;
 
   /* ---------------------------------------------------------
      BORDERS
      --------------------------------------------------------- */
-  --border-default: #dfe5e2;
-  --border-strong: #cfd8d2;
+  --border-default: #efdde5;
+  --border-strong: #dfbecd;
 
   /* ---------------------------------------------------------
      STATUS / SUPPORTING ACCENTS
+     These deliberately stay semantic.
      --------------------------------------------------------- */
-  --status-success: #0d5f50;
-  --status-warning: #f2aa00;
-  --status-danger: #a84335;
+  --status-success: #187a5a;
+  --status-warning: #c98218;
+  --status-danger: #b43b4f;
 
-  /* Kept for existing V1 component compatibility. */
-  --legacy-coral: #9b5c4d;
+  --legacy-coral: #c84e79;
 
   /* ---------------------------------------------------------
      SHAPE / ELEVATION
      --------------------------------------------------------- */
   --radius: 12px;
   --shadow-sm:
-    0 1px 2px rgba(10, 31, 27, 0.035),
-    0 8px 24px rgba(10, 31, 27, 0.035);
-  --shadow-md: 0 18px 48px rgba(10, 31, 27, 0.09);
+    0 1px 2px rgba(77, 20, 43, 0.035),
+    0 8px 24px rgba(77, 20, 43, 0.045);
+  --shadow-md: 0 18px 48px rgba(77, 20, 43, 0.11);
 
   /* ---------------------------------------------------------
      EXISTING V1 VARIABLE API
-     Keep these mappings while legacy.css is being consolidated.
      --------------------------------------------------------- */
   --background: var(--surface-page);
   --foreground: var(--text-body);
@@ -83,14 +85,544 @@
   --muted: var(--surface-muted);
   --muted-foreground: var(--text-muted);
 
+  /* Compatibility aliases retained for current class names. */
   --gold: var(--brand-accent);
   --gold-dark: var(--brand-accent-dark);
   --ink: var(--text-heading);
   --coral: var(--legacy-coral);
   --surface: var(--surface-soft);
 
-  /* Current V4 readability variables. */
   --ui-text: var(--text-ui);
   --ui-subtle: var(--text-subtle);
   --ui-border-strong: var(--border-strong);
+}
+
+/* =========================================================
+   GLOBAL THEME COMPATIBILITY
+   These selectors replace remaining old green/gold literals
+   without changing the layout architecture.
+   ========================================================= */
+
+body {
+  background: var(--surface-page);
+  color: var(--text-body);
+}
+
+.brand-copy strong,
+.site-header .brand-copy strong {
+  color: var(--text-heading);
+}
+
+.brand-copy small {
+  color: var(--text-muted);
+}
+
+.mark {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.mark i {
+  background: var(--brand-accent);
+  border-color: var(--brand-primary);
+}
+
+.site-header {
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom-color: var(--border-default);
+  box-shadow: 0 1px 0 rgba(78, 18, 43, 0.025);
+}
+
+.site-header nav,
+.portal-link,
+.crumb,
+.section-heading > p,
+.section-intro p,
+.page-hero p,
+.section > p {
+  color: var(--text-muted);
+}
+
+.site-header nav a:hover,
+.text-button,
+.focus-card > a,
+.event-card footer a {
+  color: var(--brand-primary);
+}
+
+.site-header nav a:hover:after {
+  background: var(--brand-accent);
+}
+
+.menu-btn,
+.portal-mobile-menu {
+  color: var(--text-heading);
+  border-color: var(--border-default);
+}
+
+.button {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.button:hover {
+  background: var(--brand-primary-hover);
+}
+
+.button.secondary {
+  color: var(--text-heading);
+  border-color: var(--border-strong);
+  background: #fff;
+}
+
+.button.secondary:hover {
+  background: var(--surface-soft);
+  border-color: var(--brand-accent-dark);
+}
+
+/* Neutral/brand badges. Semantic success/error badges remain separate. */
+.pill {
+  background: var(--surface-soft);
+  color: #8a2a50;
+  border-color: #f0cfdd;
+}
+
+.pill.coral,
+.pill.gold {
+  background: #fff0f5;
+  color: #9c315b;
+  border-color: #efc8d8;
+}
+
+.pill.dark {
+  background: var(--brand-primary-deep);
+  border-color: var(--brand-primary-deep);
+  color: #fff;
+}
+
+/* Keep success status visually semantic rather than pink. */
+.pill.teal {
+  background: #e9f5f0;
+  color: #21684f;
+  border-color: #cfe8dc;
+}
+
+/* =========================================================
+   PUBLIC SITE
+   ========================================================= */
+
+.hero-trust-row {
+  border-top-color: var(--border-default);
+  color: var(--text-muted);
+}
+
+.hero-trust-row svg {
+  color: var(--brand-primary);
+}
+
+.hero-feature,
+.professional-cta {
+  background: linear-gradient(
+    145deg,
+    #8f1848 0%,
+    #78133b 58%,
+    #55102d 100%
+  );
+  color: #fff;
+  box-shadow: 0 24px 60px rgba(82, 15, 44, 0.2);
+}
+
+.hero-feature:after {
+  border-color: rgba(243, 166, 194, 0.32);
+}
+
+.feature-kicker,
+.feature-seal,
+.feature-meta svg {
+  color: #ffd2e2;
+}
+
+.hero-feature .feature-header p {
+  color: #f2c4d5;
+}
+
+.feature-meta {
+  color: #fff7fa;
+}
+
+.feature-meta small {
+  color: #e7aec4;
+}
+
+.feature-actions > a:first-child {
+  color: #fff3f7;
+}
+
+.section-surface {
+  background: #fff;
+  border-color: var(--border-default);
+}
+
+.focus-card {
+  background: #fff !important;
+  border-color: var(--border-default);
+}
+
+.focus-card:before {
+  background: var(--brand-primary);
+}
+
+.focus-icon {
+  background: var(--surface-soft);
+  color: var(--brand-primary);
+}
+
+.focus-number {
+  color: #a58c97;
+}
+
+.focus-card p,
+.nominee-card > p,
+.event-card p {
+  color: var(--text-muted) !important;
+}
+
+.panel,
+.event-card,
+.cms-news-card,
+.cms-gallery-grid figure,
+.cms-partner-item {
+  background: #fff;
+  border-color: var(--border-default);
+}
+
+.nominee-code {
+  color: #927c86;
+}
+
+.nominee-card .mini-avatar,
+.profile-avatar {
+  background: var(--surface-soft) !important;
+  color: #873052;
+  border-color: #efd1dd;
+}
+
+.card-actions {
+  border-top-color: var(--surface-muted);
+}
+
+.event-date b {
+  color: var(--text-heading);
+}
+
+.event-date span {
+  color: var(--text-muted);
+}
+
+.professional-cta p {
+  color: #f1c6d6;
+}
+
+/* Footer */
+.footer {
+  background: #55102d;
+  color: #fff;
+}
+
+.footer .mark {
+  background: #fff;
+  color: var(--brand-primary-deep);
+}
+
+.footer .mark i {
+  background: var(--brand-accent);
+  border-color: #fff;
+}
+
+.footer .brand-copy small,
+.footer-brand p,
+.footer-links a,
+.footer small {
+  color: #d9aabe;
+}
+
+.footer-links a:hover,
+.footer .brand-copy strong,
+.footer-links strong {
+  color: #fff;
+}
+
+/* Inputs / public forms */
+.filter-row input,
+.filter-row select,
+.contact-form input,
+.contact-form textarea,
+.contact-form select,
+.checkout-page input,
+.checkout-page select {
+  border-color: var(--border-default) !important;
+  background: #fff !important;
+  color: var(--text-heading) !important;
+}
+
+.filter-row input:focus,
+.filter-row select:focus,
+.contact-form input:focus,
+.contact-form textarea:focus,
+.checkout-page input:focus,
+.checkout-page select:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.1) !important;
+}
+
+/* =========================================================
+   ADMIN + NOMINEE PORTAL
+   ========================================================= */
+
+.portal-side {
+  background: linear-gradient(180deg, #661133 0%, #4f0e29 100%);
+  color: #fff;
+  border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+.portal-side-head,
+.side-bottom {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.portal-side .brand-copy strong,
+.portal-user-row {
+  color: #fff;
+}
+
+.portal-side .brand-copy small,
+.portal-side a,
+.side-bottom > a {
+  color: #d3a7b8;
+}
+
+.portal-side .mark {
+  background: #fff;
+  color: var(--brand-primary-deep);
+}
+
+.portal-side .mark i {
+  background: var(--brand-accent);
+  border-color: #fff;
+}
+
+.portal-workspace-badge {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f0c8d7;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.portal-side a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.portal-side a.side-active {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.portal-user-row .user-dot {
+  background: #8d2a50;
+  color: #fff;
+}
+
+.portal-header {
+  background: #fff;
+  border-bottom-color: var(--border-default);
+}
+
+.environment-badge {
+  color: var(--text-muted);
+  border-color: var(--border-default);
+  background: var(--surface-soft);
+}
+
+.portal-title p {
+  color: var(--text-muted);
+}
+
+/* Common admin surfaces */
+.v2-admin-page,
+.mobile-admin-page,
+.portal-content {
+  color: var(--text-body);
+}
+
+.v2-admin-page-head p,
+.live-empty-copy,
+.live-empty-state p,
+.live-admin-table small {
+  color: var(--text-muted);
+}
+
+.live-admin-form input,
+.live-admin-form select,
+.live-admin-form textarea,
+.mobile-admin-form input,
+.mobile-admin-form select,
+.mobile-admin-form textarea {
+  border-color: var(--border-default) !important;
+  background: #fff !important;
+  color: var(--text-heading) !important;
+}
+
+.live-admin-form input:focus,
+.live-admin-form select:focus,
+.live-admin-form textarea:focus,
+.mobile-admin-form input:focus,
+.mobile-admin-form select:focus,
+.mobile-admin-form textarea:focus {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.09) !important;
+}
+
+/* =========================================================
+   CMS / CONTENT
+   ========================================================= */
+
+.cms-home-feature-media,
+.cms-image-placeholder.dark,
+.cms-home-feature-empty {
+  background: linear-gradient(
+    145deg,
+    #8f1848 0%,
+    #661133 100%
+  );
+  color: #fff;
+}
+
+.cms-prose {
+  color: #55434b;
+}
+
+.cms-partner-logo {
+  background: #fffafb;
+  border-color: var(--border-default);
+}
+
+/* =========================================================
+   SCANNER / CHECK-IN
+   Keep operational dark camera surface, but brand controls pink.
+   ========================================================= */
+
+.scanner-event-control label,
+.scanner-event-meta span,
+.scanner-event-meta small,
+.scanner-live-stats span,
+.scan-result-message,
+.scan-result-time,
+.scanner-empty-recent,
+.scanner-no-events p,
+.checkin-admin-event-filter label,
+.checkin-admin-event-card p {
+  color: var(--text-muted);
+}
+
+.scanner-event-control select,
+.scanner-event-control input,
+.scanner-live-stats article,
+.scanner-no-events,
+.checkin-admin-event-filter {
+  border-color: var(--border-default);
+  background: #fff;
+  color: var(--text-heading);
+}
+
+.scanner-event-meta {
+  border-color: var(--border-default);
+  background: var(--surface-soft);
+}
+
+.scanner-event-meta strong,
+.scanner-live-stats strong {
+  color: var(--text-heading);
+}
+
+.scanner-refresh-button,
+.scanner-admin-link {
+  color: var(--brand-primary);
+}
+
+.scanner-no-events svg {
+  color: var(--brand-primary);
+}
+
+/* =========================================================
+   TICKETING / TRANSACTION SURFACES
+   Provider-specific Vult / MoMo / Mastercard colours are intentionally
+   NOT recoloured. Only GPFB-owned surfaces and accents change.
+   ========================================================= */
+
+.ticket-wallet-page {
+  background: #fff8fb;
+}
+
+.ticket-wallet-shell,
+.ticket-wallet-card {
+  background: #fff;
+  border-color: var(--border-default);
+  box-shadow: 0 12px 34px rgba(77, 20, 43, 0.07);
+}
+
+.ticket-wallet-header {
+  border-bottom-color: var(--border-default);
+}
+
+.ticket-wallet-header span {
+  color: var(--brand-primary);
+}
+
+.ticket-wallet-header h1,
+.ticket-wallet-card-head span,
+.ticket-wallet-code strong,
+.ticket-wallet-pending strong,
+.ticket-wallet-pay-summary strong {
+  color: var(--text-heading);
+}
+
+.ticket-wallet-header p,
+.ticket-wallet-event-meta span,
+.ticket-wallet-card-head strong,
+.ticket-wallet-code span,
+.ticket-wallet-card > p,
+.ticket-wallet-pending {
+  color: var(--text-muted);
+}
+
+.ticket-wallet-event-meta span,
+.ticket-wallet-card {
+  border-color: var(--border-default);
+}
+
+.ticket-wallet-intro {
+  border-left-color: var(--brand-primary);
+  background: var(--surface-soft);
+  color: #6a4655;
+}
+
+.ticket-wallet-qr {
+  background: #fff9fb;
+}
+
+/* =========================================================
+   SELECTION / ACCESSIBILITY
+   ========================================================= */
+
+::selection {
+  background: #f5b3cb;
+  color: #3b1022;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-color: var(--brand-primary);
 }
