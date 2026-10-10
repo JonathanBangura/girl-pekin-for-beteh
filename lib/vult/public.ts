@@ -1,6 +1,9 @@
 import { createPublicClient } from '@/lib/supabase/public'
 
-export type PublicVultOrderKind = 'vote' | 'ticket'
+export type PublicVultOrderKind =
+  | 'vote'
+  | 'ticket'
+  | 'donation'
 
 export async function getPublicVultPaymentStatus(
   kind: PublicVultOrderKind,

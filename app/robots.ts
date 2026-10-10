@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
         '/payment/',
         '/tickets/',
+        '/donate/receipt/',
       ],
     },
     sitemap: new URL('/sitemap.xml', SITE_URL).toString(),

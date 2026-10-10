@@ -8,6 +8,7 @@ import {
   getPublicNomineeDirectory,
 } from '@/lib/public/live-awards-data'
 import { getPublicEvents } from '@/lib/ticketing/live-data'
+import { getPublicDonationCampaigns } from '@/lib/donations/public-data'
 import { SITE_URL } from '@/lib/seo/site'
 
 function url(path: string) {
@@ -33,6 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: url('/nominees'), changeFrequency: 'daily', priority: 0.9 },
     { url: url('/events'), changeFrequency: 'weekly', priority: 0.9 },
     { url: url('/news'), changeFrequency: 'weekly', priority: 0.8 },
+    { url: url('/donate'), changeFrequency: 'weekly', priority: 0.9 },
     { url: url('/gallery'), changeFrequency: 'weekly', priority: 0.6 },
     { url: url('/partners'), changeFrequency: 'monthly', priority: 0.6 },
     { url: url('/results'), changeFrequency: 'daily', priority: 0.9 },
@@ -45,12 +47,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     eventsResult,
     nomineesResult,
     awardsResult,
+    donationCampaignsResult,
   ] = await Promise.allSettled([
     getPublishedPrograms(),
     getPublishedNews(),
     getPublicEvents(),
     getPublicNomineeDirectory({}),
     getPublicAwardsIndex(),
+    getPublicDonationCampaigns(),
   ])
 
   const dynamicEntries: MetadataRoute.Sitemap = []
@@ -109,6 +113,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     })
+  }
+
+  if (donationCampaignsResult.status === 'fulfilled') {
+    for (const campaign of donationCampaignsResult.value) {
+      dynamicEntries.push({
+        url: url(`/donate/${campaign.slug}`),
+        changeFrequency: 'weekly',
+        priority:
+          campaign.campaign_kind === 'general'
+            ? 0.8
+            : 0.7,
+      })
+    }
   }
 
   const unique = new Map<

@@ -8,6 +8,7 @@
 @import '../styles/transactions.css';
 @import '../styles/scanner.css';
 @import '../styles/cms.css';
+@import '../styles/donations.css';
 
 /*
   Theme is intentionally imported LAST.

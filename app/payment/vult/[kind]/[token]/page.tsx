@@ -9,7 +9,11 @@ export default async function Page({
 }) {
   const { kind, token } = await params
 
-  if (kind !== 'vote' && kind !== 'ticket') {
+  if (
+    kind !== 'vote' &&
+    kind !== 'ticket' &&
+    kind !== 'donation'
+  ) {
     notFound()
   }
 

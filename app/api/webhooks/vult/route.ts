@@ -6,6 +6,7 @@ import {
 } from '@/lib/vult/webhook'
 import { issueTicketsForPaidOrder } from '@/lib/ticketing/ticket-issuance'
 import { deliverTicketOrderEmail } from '@/lib/ticketing/ticket-email'
+import { deliverDonationReceiptEmail } from '@/lib/donations/donation-email'
 
 export const runtime = 'nodejs'
 
@@ -58,6 +59,31 @@ async function findPaymentByOrderId(
       return {
         kind: 'ticket' as const,
         orderId: ticketOrder.id,
+        payment,
+      }
+    }
+  }
+
+  const { data: donation } = await admin
+    .from('donations')
+    .select('id,donation_number')
+    .eq('donation_number', orderId)
+    .maybeSingle()
+
+  if (donation) {
+    const { data: payment } = await admin
+      .from('payments')
+      .select('id,status,provider_payload')
+      .eq('provider', 'vult')
+      .eq('donation_id', donation.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (payment) {
+      return {
+        kind: 'donation' as const,
+        orderId: donation.id,
         payment,
       }
     }
@@ -175,19 +201,35 @@ export async function POST(request: NextRequest) {
         ? resolved.payment.provider_payload
         : {}
 
+    const failureMessage =
+      resolved.kind === 'donation'
+        ? 'Vult reported a failed donation payment attempt.'
+        : 'Vult reported a failed payment attempt. Order remains pending for retry.'
+
     await admin
       .from('payments')
       .update({
+        ...(resolved.kind === 'donation'
+          ? { status: 'failed' }
+          : {}),
         provider_payload: {
           ...currentPayload,
           last_webhook_status: 'failed',
           last_vult_request_id: payload.vultRequestId,
           last_webhook_payload: rawBody,
         },
-        failure_reason:
-          'Vult reported a failed payment attempt. Order remains pending for retry.',
+        failure_reason: failureMessage,
       })
       .eq('id', resolved.payment.id)
+
+    if (resolved.kind === 'donation') {
+      await admin
+        .from('donations')
+        .update({
+          status: 'failed',
+        })
+        .eq('id', resolved.orderId)
+    }
 
     await admin
       .from('payment_events')
@@ -200,7 +242,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       received: true,
       status: 'failed',
-      order_kept_pending: true,
+      order_kept_pending: resolved.kind !== 'donation',
     })
   }
 
@@ -221,7 +263,7 @@ export async function POST(request: NextRequest) {
       )
 
       if (error) throw error
-    } else {
+    } else if (resolved.kind === 'ticket') {
       const { error } = await admin.rpc(
         'mark_ticket_payment_success',
         {
@@ -242,14 +284,38 @@ export async function POST(request: NextRequest) {
       // the unique item/sequence constraint prevents duplicate tickets.
       await issueTicketsForPaidOrder(resolved.orderId)
 
-      // Email failure must not roll back a successful payment or ticket
-      // issuance. The delivery status is recorded and the customer can resend
-      // from the secure ticket-wallet page.
+      // Email failure must not roll back successful payment/ticket issuance.
       try {
         await deliverTicketOrderEmail(resolved.orderId)
       } catch (deliveryError) {
         console.error(
           'Ticket email delivery failed after successful payment',
+          deliveryError,
+        )
+      }
+    } else {
+      const { error } = await admin.rpc(
+        'mark_donation_payment_success',
+        {
+          p_payment_id: resolved.payment.id,
+          p_provider_transaction_id: payload.vultRequestId,
+          p_provider_payload: {
+            last_webhook_status: 'completed',
+            last_vult_request_id: payload.vultRequestId,
+            webhook_payload: rawBody,
+          },
+          p_paid_at: new Date().toISOString(),
+        },
+      )
+
+      if (error) throw error
+
+      // Receipt email failure must never roll back a successful donation.
+      try {
+        await deliverDonationReceiptEmail(resolved.orderId)
+      } catch (deliveryError) {
+        console.error(
+          'Donation acknowledgement email failed after successful payment',
           deliveryError,
         )
       }

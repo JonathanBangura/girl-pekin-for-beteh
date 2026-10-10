@@ -10,6 +10,8 @@ export type PermissionCode =
   | 'results.manage'
   | 'events.manage'
   | 'finance.manage'
+  | 'donations.read'
+  | 'donations.manage'
   | 'checkin.use'
   | 'content.manage'
   | 'users.manage'

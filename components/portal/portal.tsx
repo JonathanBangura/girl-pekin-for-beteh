@@ -14,6 +14,7 @@ import {
   FileBarChart,
   FileText,
   GraduationCap,
+  Heart,
   LayoutDashboard,
   Menu,
   Megaphone,
@@ -91,6 +92,16 @@ const adminGroups: readonly NavGroup[] = [
     ],
   ],
   [
+    'DONATIONS',
+    [
+      ['Overview', '/admin/donations', Heart],
+      ['Campaigns', '/admin/donations/campaigns', Megaphone],
+      ['Donations', '/admin/donations/donations', Receipt],
+      ['Donors', '/admin/donations/donors', Users],
+      ['Reports', '/admin/donations/reports', FileBarChart],
+    ],
+  ],
+  [
     'FINANCE',
     [
       ['Overview', '/admin/finance', WalletCards],
@@ -127,6 +138,7 @@ function active(path: string, href: string) {
     '/nominee',
     '/admin/awards',
     '/admin/events',
+    '/admin/donations',
     '/admin/finance',
   ])
 
@@ -156,6 +168,11 @@ function routeLabel(path: string, admin: boolean) {
     '/admin/events/sales': 'Events / Sales Dashboard',
     '/admin/events/tickets': 'Events / Tickets',
     '/admin/events/checkins': 'Events / Check-ins',
+    '/admin/donations': 'Donations',
+    '/admin/donations/campaigns': 'Donations / Campaigns',
+    '/admin/donations/donations': 'Donations / Transactions',
+    '/admin/donations/donors': 'Donations / Donors',
+    '/admin/donations/reports': 'Donations / Reports',
     '/admin/finance': 'Finance',
     '/admin/finance/payments': 'Finance / Payments',
     '/admin/finance/reconciliation':

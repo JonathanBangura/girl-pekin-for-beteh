@@ -55,6 +55,7 @@ const primaryNav = [
   ['Nominees', '/nominees'],
   ['Events', '/events'],
   ['News', '/news'],
+  ['Donate', '/donate'],
 ] as const
 
 export function PublicHeader() {
@@ -196,6 +197,7 @@ export function PublicFooter() {
         <Link href="/nominees">Nominees</Link>
         <Link href="/vote">Vote</Link>
         <Link href="/events">Events</Link>
+        <Link href="/donate">Donate</Link>
       </div>
 
       <div className="footer-links">

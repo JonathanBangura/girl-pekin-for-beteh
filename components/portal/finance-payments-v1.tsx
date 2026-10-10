@@ -69,7 +69,7 @@ type PaymentsFilters = {
   page?: string
 }
 
-const v1Statuses = new Set([
+const allowedStatuses = new Set([
   'pending',
   'processing',
   'succeeded',
@@ -77,12 +77,13 @@ const v1Statuses = new Set([
   'cancelled',
 ])
 
-const v1Types = new Set([
+const allowedTypes = new Set([
   'vote',
   'ticket',
+  'donation',
 ])
 
-function v1Filters(
+function safeFilters(
   filters: PaymentsFilters,
 ): PaymentsFilters {
   return {
@@ -92,12 +93,12 @@ function v1Filters(
     page: filters.page,
     status:
       filters.status &&
-      v1Statuses.has(filters.status)
+      allowedStatuses.has(filters.status)
         ? filters.status
         : undefined,
     type:
       filters.type &&
-      v1Types.has(filters.type)
+      allowedTypes.has(filters.type)
         ? filters.type
         : undefined,
   }
@@ -131,8 +132,8 @@ export async function FinancePaymentsV1Page({
 }: {
   filters: PaymentsFilters
 }) {
-  const safeFilters = v1Filters(filters)
-  const data = await getFinancePaymentsData(safeFilters)
+  const filtersSafe = safeFilters(filters)
+  const data = await getFinancePaymentsData(filtersSafe)
 
   return (
     <div className="portal-content v2-admin-page mobile-admin-page">
@@ -143,7 +144,7 @@ export async function FinancePaymentsV1Page({
           </span>
           <h1>Payments</h1>
           <p>
-            Search and review Version 1 vote and ticket payment
+            Search and review vote, ticket and donation payment
             records without exposing finance data publicly.
           </p>
         </div>
@@ -164,8 +165,8 @@ export async function FinancePaymentsV1Page({
           Search
           <input
             name="q"
-            defaultValue={safeFilters.q ?? ''}
-            placeholder="Order, payment ID, provider reference, payer name, email or phone"
+            defaultValue={filtersSafe.q ?? ''}
+            placeholder="Order/donation reference, payment ID, provider reference, payer name, email or phone"
           />
         </label>
 
@@ -173,11 +174,12 @@ export async function FinancePaymentsV1Page({
           Payment type
           <select
             name="type"
-            defaultValue={safeFilters.type ?? ''}
+            defaultValue={filtersSafe.type ?? ''}
           >
             <option value="">All types</option>
             <option value="vote">Vote</option>
             <option value="ticket">Ticket</option>
+            <option value="donation">Donation</option>
           </select>
         </label>
 
@@ -185,7 +187,7 @@ export async function FinancePaymentsV1Page({
           Status
           <select
             name="status"
-            defaultValue={safeFilters.status ?? ''}
+            defaultValue={filtersSafe.status ?? ''}
           >
             <option value="">All statuses</option>
             <option value="pending">Pending</option>
@@ -202,7 +204,7 @@ export async function FinancePaymentsV1Page({
           Payment method
           <select
             name="method"
-            defaultValue={safeFilters.method ?? ''}
+            defaultValue={filtersSafe.method ?? ''}
           >
             <option value="">All methods</option>
             <option value="in-app">Vult App</option>
@@ -216,7 +218,7 @@ export async function FinancePaymentsV1Page({
           Provider
           <select
             name="provider"
-            defaultValue={safeFilters.provider ?? ''}
+            defaultValue={filtersSafe.provider ?? ''}
           >
             <option value="">All providers</option>
             {data.providers.map((provider) => (
@@ -254,14 +256,14 @@ export async function FinancePaymentsV1Page({
           <table className="live-admin-table">
             <thead>
               <tr>
-                <th>Order / Payment</th>
+                <th>Reference / Payment</th>
                 <th>Type</th>
                 <th>Provider</th>
                 <th>Method</th>
                 <th>Payer</th>
                 <th>Amount</th>
                 <th>Payment</th>
-                <th>Order</th>
+                <th>Order / Donation</th>
                 <th>Paid</th>
                 <th>Failure / delivery</th>
               </tr>
@@ -359,7 +361,7 @@ export async function FinancePaymentsV1Page({
               <Link
                 className="button secondary"
                 href={financePaymentsHref(
-                  safeFilters,
+                  filtersSafe,
                   data.page - 1,
                 )}
               >
@@ -375,7 +377,7 @@ export async function FinancePaymentsV1Page({
               <Link
                 className="button secondary"
                 href={financePaymentsHref(
-                  safeFilters,
+                  filtersSafe,
                   data.page + 1,
                 )}
               >
